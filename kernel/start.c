@@ -12,6 +12,7 @@
 /// Dateien aus zu lagern.
 
 #include <arch/bsp/yellow_led.h>
+#include <arch/bsp/pl011_uart.h>
 
 volatile unsigned int counter = 0;
 
@@ -26,7 +27,7 @@ void increment_counter() {
 
 void start_kernel(){
 
-	yellow_on();
+	read_uart();
 
 	// Endless counter
 	for (;;) {
