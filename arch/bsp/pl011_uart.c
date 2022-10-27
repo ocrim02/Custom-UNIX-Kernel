@@ -1,14 +1,17 @@
 #include <arch/bsp/pl011_uart.h>
 #include <arch/bsp/yellow_led.h>
 #include <stdarg.h>
-#include <math.h>
+#include <stdbool.h>
 
 #define UART_BASE (0x7E201000 - 0x3F000000)
 #define FR_OFFSET 0x18
 #define DR_OFFSET 0x0
 
-#define MAX_INT_STRING_SIZE 6
-#define MAX_UNSIGNED_INT_STRING_SIZE 5
+#define INT_SIZE 32
+#define UNSIGNED_INT_SIZE 32
+#define VOID_SIZE 32
+#define MAX_INT_STRING_SIZE 11
+#define MAX_UNSIGNED_INT_STRING_SIZE 10
 //#define LCRH_OFFSET 0x2c
 
 
@@ -49,7 +52,14 @@ RXFF: set to 1 when receive holding reg is full
 TXFF: set to 1 when transmission holding reg is full
 RXFE: set to 1 when receive holding reg is empty
 BUSY: bussy sending
-CTS: 
+CTS:
+
+
+TODO:
+- comments
+- error returns
+- check int and unsigned int sizes
+
 */
 
 //implement FR checks
@@ -68,7 +78,13 @@ void read_uart(void)
         if(data_reg->data == 0x72)
         {
             light_row();
-            kprintf("Hello I am %i Years old. %u lol", -5000, 60000);
+            //kprintf("Hello I am %i Years old. %u lol\n", -2100000000, 2200000000);
+            kprintf("int: %i.\n",-2147483647);
+            kprintf("uint: %u.\n",(unsigned int)2147483648);
+            kprintf("The right address is %x.\n", (unsigned int) 4294967295);
+            kprintf("The right address is %u.\n", (unsigned int) 4294967293);
+            kprintf("The right address is %p.\n", (void*) 0xFFFFFFFF);
+            
             //int_to_str(327);
         }
     }
@@ -86,27 +102,56 @@ void kprintf(char* string, ...)
     
     va_list ap;
     va_start(ap, string);
+    bool spaces = false;
+    bool zeros = false;
     
     char character = *string++;
     while(character != '\0'){
         if(character == '%')
         {
             character = *string++;
-            if(character == 'i'){
+            /*if(character == '8'){
+                spaces = true;
+                character = *string++;
+            }
+            else if(character == '0'){
+                if(*string++ != '8'){
+                    //error
+                }
+                zeros = true;
+            }*/
+
+            if(character == 'c'){
                 int value = va_arg(ap, int);
-                kprintf(int_to_str(value));
+                write_uart((unsigned char) value);
                 character = *string++;
             }
-            if(character == 'u'){
-                unsigned int value = va_arg(ap, unsigned int);
-                kprintf(unsigned_int_to_str(value));
-                character = *string++;
-            }
-            if(character == 's'){
+            else if(character == 's'){
                 char* value = va_arg(ap, char*);
                 kprintf(value);
                 character = *string++;
             }
+            else if(character == 'x'){
+                unsigned int value = va_arg(ap, unsigned int);
+                kprintf(unsigned_int_to_hex_str(value));
+                character = *string++;
+            }
+            else if(character == 'i'){
+                int value = va_arg(ap, int);
+                kprintf(int_to_dec_str(value));
+                character = *string++;
+            }
+            else if(character == 'u'){
+                unsigned int value = va_arg(ap, unsigned int);
+                kprintf(unsigned_int_to_dec_str(value));
+                character = *string++;
+            }
+            else if(character == 'p'){
+                void* value = va_arg(ap, void*);
+                kprintf(void_to_hex_str(value));
+                character = *string++;
+            }
+            
             
         }
         write_uart(character);
@@ -116,7 +161,7 @@ void kprintf(char* string, ...)
 }
 
 //converts unsigned int to char array
-char* unsigned_int_to_str (unsigned int value)
+char* unsigned_int_to_dec_str (unsigned int value)
 {
     static char string[MAX_UNSIGNED_INT_STRING_SIZE + 1];
 
@@ -128,13 +173,16 @@ char* unsigned_int_to_str (unsigned int value)
         return string;
     }
 
-    int divisor = 1;
-    int len = 0;
-    while(value/divisor != 0){
+    unsigned int divisor = 1;
+    int len = 1;
+    while(value/(divisor*10) != 0){
         len++;
         divisor = divisor * 10;
+        if(divisor == 1000000000){
+            break;
+        }
     }
-    divisor = divisor/10;
+    
     
     int digit;
     for(int i=0; i<=len-1; i++)
@@ -150,7 +198,7 @@ char* unsigned_int_to_str (unsigned int value)
 }
 
 //converts int to char array
-char* int_to_str (int value)
+char* int_to_dec_str (int value)
 {
     static char string[MAX_INT_STRING_SIZE + 1];
     int negatives_offset = 0;
@@ -160,7 +208,7 @@ char* int_to_str (int value)
         value = value * (-1);
     }
 
-    char* rest = unsigned_int_to_str((unsigned int) value);
+    char* rest = unsigned_int_to_dec_str((unsigned int) value);
     for(int i=0; i<= MAX_UNSIGNED_INT_STRING_SIZE; i++){
         string[i + negatives_offset] = rest[i];
     }
@@ -168,4 +216,50 @@ char* int_to_str (int value)
     return string;
     
 
+}
+
+char* unsigned_int_to_hex_str(unsigned int value)
+{
+    int digit_count = UNSIGNED_INT_SIZE/4;
+    unsigned int digit_values[UNSIGNED_INT_SIZE/4];
+    for(int i=0; i<digit_count; i++){
+        digit_values[i] = 0;
+    }
+    unsigned int mask = 15; //...0000000000001111
+    for(int i=digit_count-1; i>=0; i--){
+        digit_values[i] = value & mask;
+        value = value >> 4;
+    }
+
+    //conversion list
+    char conversion_list[16] = "0123456789ABCDEF";
+    static char string[(UNSIGNED_INT_SIZE/4)+1];
+
+    int offset = 0;
+    for(int i=0; i<digit_count; i++){
+        if(digit_values[i] != 0){
+            break;
+        }
+        else{
+            offset++;
+        }
+    }
+    for(int i=0; i<digit_count-offset; i++){
+        string[i] = conversion_list[digit_values[i+offset]];
+    }
+    string[digit_count-offset] = '\0';
+
+    return string;
+}
+
+char* void_to_hex_str(void* pointer)
+{
+    static char string[(UNSIGNED_INT_SIZE/4)+3];
+    string[0] = '0';
+    string[1] = 'x';
+    char* content = unsigned_int_to_hex_str((unsigned int) pointer);
+    for(int i=0; i<(UNSIGNED_INT_SIZE/4); i++){
+        string[i+2] = content[i];
+    }
+    return string;
 }
