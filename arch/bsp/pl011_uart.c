@@ -25,7 +25,8 @@ struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
 TODO:
 - comments
 - error returns
-- check int and unsigned int sizes -> 32 bit
+- function returns
+- tests
 */
 
 //implement FR checks
@@ -79,8 +80,11 @@ void kprintf(char* string, ...)
     
     char character = *string++;
     while(character != '\0'){
-        if(character == '%')
-        {
+        if(character != '%'){
+            write_uart(character);
+            character = *string++;
+        }
+        else{
             character = *string++;
             if(character == '8'){
                 spaces = true;
@@ -124,11 +128,9 @@ void kprintf(char* string, ...)
                 kprintf(eight_number(void_to_hex_str(value), spaces, false));
                 character = *string++;
             }
-            
-            
+
         }
-        write_uart(character);
-        character = *string++;
+        
     }
     va_end(ap);
 }
