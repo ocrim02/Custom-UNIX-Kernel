@@ -1,7 +1,4 @@
 #include <arch/bsp/pl011_uart.h>
-#include <arch/bsp/yellow_led.h>
-#include <stdarg.h>
-#include <stdbool.h>
 
 #define UART_BASE (0x7E201000 - 0x3F000000)
 #define FR_OFFSET 0x18
@@ -12,80 +9,52 @@
 #define VOID_SIZE 32
 #define MAX_INT_STRING_SIZE 11
 #define MAX_UNSIGNED_INT_STRING_SIZE 10
-//#define LCRH_OFFSET 0x2c
 
-
-unsigned int* const flag_reg = (unsigned int *) UART_BASE + FR_OFFSET;
-//unsigned int* const lcrh_reg = (unsigned int *) UART_BASE + LCRH_OFFSET;
-
-struct uart_dr{
-    unsigned int data : 8;
-    unsigned int fe : 1;
-    unsigned int pe : 1;
-    unsigned int be : 1;
-    unsigned int oe : 1;
-    unsigned int unused0 : 20;
-};
-
-struct uart_fr{
-    unsigned int cts : 1;
-    unsigned int dsr : 1;
-    unsigned int dcd : 1;
-    unsigned int busy : 1;
-    unsigned int rxfe : 1;
-    unsigned int txff : 1;
-    unsigned int rxff : 1;
-    unsigned int txfe : 1;
-    unsigned int ri : 1;
-    unsigned int unused0 : 23;
+struct uart_regs{
+    unsigned int data;
+    unsigned int unused0[5];
+    unsigned int fr;
+    unsigned int unused1[8];
+    unsigned int ris;
 };
 
 static volatile
-struct uart_dr* const data_reg = (struct uart_dr *) UART_BASE + DR_OFFSET;
-
-static volatile
-struct uart_fr* const fr_reg = (struct uart_fr *) UART_BASE + FR_OFFSET;
+struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
 
 /*
-TXFE: set to 1 when transmission holding reg is empty
-RXFF: set to 1 when receive holding reg is full
-TXFF: set to 1 when transmission holding reg is full
-RXFE: set to 1 when receive holding reg is empty
-BUSY: bussy sending
-CTS:
-
-
 TODO:
 - comments
 - error returns
-- check int and unsigned int sizes
-
+- check int and unsigned int sizes -> 32 bit
 */
 
 //implement FR checks
 void read_uart(void)
 {
-    /*unsigned int data = 0;
-    unsigned int mask = 0;
-
-    for (unsigned i=0; i<8; i++){
-        mask |= 1 << i;
-    }
-    */
+    unsigned int dr = 0;
     while (1)
     {
-        //data = *data_reg & mask;
-        if(data_reg->data == 0x72)
-        {
-            light_row();
-            //kprintf("Hello I am %i Years old. %u lol\n", -2100000000, 2200000000);
-            kprintf("int: %i.\n",-2147483647);
-            kprintf("uint: %u.\n",(unsigned int)2147483648);
-            kprintf("The right address is %x.\n", (unsigned int) 4294967295);
-            kprintf("The right address is %u.\n", (unsigned int) 4294967293);
-            kprintf("The right address is %p.\n", (void*) 0xFFFFFFFF);
-            
-            //int_to_str(327);
+        //wait for empty fifo
+        while(read_masked(regs->fr, 4, 4) == 1);
+        dr = regs->data;
+
+        if(dr & (1<<11)){
+            kprintf("Overrun Error\n");
+        }
+        else if(dr & (1<<10)){
+            kprintf("Break Error\n");
+        }
+        else if(dr & (1<<9)){
+            kprintf("Parity Error\n");
+        }
+        else if(dr & (1<<8)){
+            kprintf("Framing Error\n");
+        }
+        else{
+            char character = (char) read_masked(dr, 7, 0);
+            if(character != 0x0){
+                kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
+            }
         }
     }
     
@@ -94,7 +63,10 @@ void read_uart(void)
 //implement FR checks
 void write_uart(char character)
 {
-    data_reg->data = character;
+    //loop until not busy
+    while(read_masked(regs->fr, 3, 3) != 0){}
+
+    regs->data = write_masked(0, (unsigned int) character, 7, 0);
 }
 
 void kprintf(char* string, ...)
@@ -110,7 +82,7 @@ void kprintf(char* string, ...)
         if(character == '%')
         {
             character = *string++;
-            /*if(character == '8'){
+            if(character == '8'){
                 spaces = true;
                 character = *string++;
             }
@@ -119,7 +91,8 @@ void kprintf(char* string, ...)
                     //error
                 }
                 zeros = true;
-            }*/
+                character = *string++;
+            }
 
             if(character == 'c'){
                 int value = va_arg(ap, int);
@@ -133,22 +106,22 @@ void kprintf(char* string, ...)
             }
             else if(character == 'x'){
                 unsigned int value = va_arg(ap, unsigned int);
-                kprintf(unsigned_int_to_hex_str(value));
+                kprintf(eight_number(unsigned_int_to_hex_str(value), spaces, zeros));
                 character = *string++;
             }
             else if(character == 'i'){
                 int value = va_arg(ap, int);
-                kprintf(int_to_dec_str(value));
+                kprintf(eight_number(int_to_dec_str(value), spaces, zeros));
                 character = *string++;
             }
             else if(character == 'u'){
                 unsigned int value = va_arg(ap, unsigned int);
-                kprintf(unsigned_int_to_dec_str(value));
+                kprintf(eight_number(unsigned_int_to_dec_str(value), spaces, zeros));
                 character = *string++;
             }
             else if(character == 'p'){
                 void* value = va_arg(ap, void*);
-                kprintf(void_to_hex_str(value));
+                kprintf(eight_number(void_to_hex_str(value), spaces, false));
                 character = *string++;
             }
             
@@ -158,6 +131,79 @@ void kprintf(char* string, ...)
         character = *string++;
     }
     va_end(ap);
+}
+
+//returns unsigned int of an masked unsigned int
+//high -> msb position
+//low -> lsb position
+unsigned int read_masked(unsigned int value, int msb, int lsb)
+{
+    unsigned int mask = 0;
+    for(int i=0; i<=msb-lsb; i++){
+        mask |= 1 << i;
+    } 
+    value = value >> lsb;
+    return value & mask;
+}
+
+unsigned int write_masked (unsigned int dest, unsigned int src, int msb, int lsb)
+{
+    unsigned int mask = 0;
+    for(int i=0; i<=msb-lsb; i++){
+        mask |= 1 << i;
+    } 
+    src = src << lsb;
+    mask = mask << lsb;
+    dest = dest & ~mask;
+    dest = src | dest;
+    return dest;
+}
+
+//returns a number string with 8 characters 
+//if spaces == true it will be filled up with spaces
+//if zeros == true it will be filled up with zeros
+//only one is allowed to be set to true
+char* eight_number(char* number, bool spaces, bool zeros)
+{
+    if(spaces == true && zeros == true){
+        //error
+    }
+    int len = str_len(number);
+    if(spaces == true){
+        static char extendet_number[9] = "        ";
+        for(int i=0; i<len; i++){
+            extendet_number[8-len+i] = number[i];
+        }
+        return extendet_number;
+    }
+    if(zeros == true){
+        static char extendet_number[9] = "00000000";
+        if(*number == '-'){
+            extendet_number[0] = '-';
+            for(int i=1; i<len; i++){
+                extendet_number[8-len+i] = number[i];
+            }
+        }
+        else{
+            for(int i=0; i<len; i++){
+                extendet_number[8-len+i] = number[i];
+            }
+        }
+        return extendet_number;
+    }
+    return number;
+    
+}
+
+//length of string without '\0'
+int str_len(char* string)
+{
+    int counter = 0;
+    while(*string != '\0'){
+        counter++;
+        string++;
+    }
+    return counter;
 }
 
 //converts unsigned int to char array
@@ -232,7 +278,7 @@ char* unsigned_int_to_hex_str(unsigned int value)
     }
 
     //conversion list
-    char conversion_list[16] = "0123456789ABCDEF";
+    char conversion_list[16] = "0123456789abcdef";
     static char string[(UNSIGNED_INT_SIZE/4)+1];
 
     int offset = 0;
