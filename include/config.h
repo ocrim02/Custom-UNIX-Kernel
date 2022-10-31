@@ -17,7 +17,7 @@
  */
 
 /* Include-Pfad bitte gegenfalls anpassen */
-//#include <kernel/kprintf.h> //muss kprintf als datei erstellt werden ?
+//#include <lib/utils.h> //muss kprintf als datei erstellt werden ?
 static inline void test_kprintf(void) {
 	/* Nur für Aufgabenblatt 1
 	 * Hier Test Funktion für kprintf schreiben und

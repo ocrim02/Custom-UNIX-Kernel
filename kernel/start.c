@@ -14,6 +14,7 @@
 #include <arch/bsp/yellow_led.h>
 #include <arch/bsp/pl011_uart.h>
 
+
 volatile unsigned int counter = 0;
 
 void increment_counter() {

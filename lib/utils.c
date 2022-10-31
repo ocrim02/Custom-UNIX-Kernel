@@ -7,6 +7,79 @@
 #define MAX_UNSIGNED_INT_STRING_SIZE 10
 
 
+void kprintf(char* string, ...)
+{
+    
+    va_list ap;
+    va_start(ap, string);
+    bool spaces = false;
+    bool zeros = false;
+    
+    char character = *string++;
+    while(character != '\0'){
+        if(character != '%'){
+            write_uart(character);
+            character = *string++;
+        }
+        else{
+            character = *string++;
+            if(character == '8'){
+                spaces = true;
+                character = *string++;
+            }
+            else if(character == '0'){
+                if(*string++ != '8'){
+                    //error
+                    kprintf(" ERROR expected %%08!");
+                    return;
+                }
+                zeros = true;
+                character = *string++;
+            }
+
+            if(character == 'c'){
+                int value = va_arg(ap, int);
+                write_uart((unsigned char) value);
+                character = *string++;
+            }
+            else if(character == 's'){
+                char* value = va_arg(ap, char*);
+                kprintf(value);
+                character = *string++;
+            }
+            else if(character == 'x'){
+                unsigned int value = va_arg(ap, unsigned int);
+                kprintf(eight_number(unsigned_int_to_hex_str(value), spaces, zeros));
+                character = *string++;
+            }
+            else if(character == 'i'){
+                int value = va_arg(ap, int);
+                kprintf(eight_number(int_to_dec_str(value), spaces, zeros));
+                character = *string++;
+            }
+            else if(character == 'u'){
+                unsigned int value = va_arg(ap, unsigned int);
+                kprintf(eight_number(unsigned_int_to_dec_str(value), spaces, zeros));
+                character = *string++;
+            }
+            else if(character == 'p'){
+                void* value = va_arg(ap, void*);
+                kprintf(eight_number(void_to_hex_str(value), spaces, false));
+                character = *string++;
+            }
+            else if(character == '%'){
+                write_uart('%');
+                character = *string++;
+            }
+
+        }
+        
+    }
+    va_end(ap);
+    return;
+}
+
+
 //returns unsigned int of an masked unsigned int
 //high -> msb position
 //low -> lsb position
