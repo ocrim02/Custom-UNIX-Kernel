@@ -219,6 +219,7 @@ static inline void test_kprintf(void) {
     //2->1
 
 	kprintf("Teste Verhalten bei Variablen mit falschen Argumenten:\n\n");
+	
     
 
     kprintf("Teste Symbole und sonderfälle:\n\n");
@@ -246,6 +247,9 @@ static inline void test_kprintf(void) {
     kprintf("Teste Feldbreite 8 linksseitig mit 0en aufgefüllt:\n\n");
         //negative und positive Zahlen
         //nur i u x 
+    kprintf("ist : hallo %%0 ERROR expected %%08!\n");
+    kprintf("ist : hallo %06 \n\n");
+    
     kprintf("Teste Verhalten bei Feldbreite über 8:\n\n");
         //negative und positive Zahlen (kann das minus verschwinden ?)
 

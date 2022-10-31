@@ -13,7 +13,7 @@
 
 #include <arch/bsp/yellow_led.h>
 #include <arch/bsp/pl011_uart.h>
-
+#include <config.h>
 
 volatile unsigned int counter = 0;
 
@@ -23,12 +23,10 @@ void increment_counter() {
 
 
 
-
-
-
 void start_kernel(){
 
-	read_uart();
+	//read_uart();
+	test_kprintf();
 
 	// Endless counter
 	for (;;) {
