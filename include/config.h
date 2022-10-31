@@ -36,7 +36,7 @@ static inline void test_kprintf(void) {
 	kprintf("Teste C-Variable:\n\n");
 	
     kprintf("soll: A\n");
-    int i = 65; //askii ??
+    int i = 65;
     kprintf("ist : %c\n\n\n", i);
 
 	kprintf("Teste S-Variable:\n\n");
@@ -220,7 +220,37 @@ static inline void test_kprintf(void) {
 
 	kprintf("Teste Verhalten bei Variablen mit falschen Argumenten:\n\n");
 	
-    
+    //Bei i und u Test Werte nehmen die die anderen nicht 	nehmen können ? Werte Bereich und negatives ?
+/*
+	kprintf("soll: Fehler oder nichts\n");
+	kprintf("ist : %c\n\n\n", i);
+
+	kprintf("Teste S-Variable:\n\n");
+
+	kprintf("soll: Fehler oder nichts\n");
+	kprintf("ist : %s\n\n\n", string);
+
+	kprintf("Teste x-Variable:\n\n");
+
+	kprintf("soll: Fehler oder nichts\n");
+	kprintf("ist : %x\n\n\n",(unsigned int)588654);
+
+	kprintf("Teste I-Variable:\n\n"); 
+
+	kprintf("soll: Fehler oder nichts\n");
+	kprintf("ist : %i\n\n\n",(int)-347825612);
+
+	kprintf("Teste U-Variable:\n\n");
+
+	kprintf("soll: Fehler oder nichts\n");
+	kprintf("ist : %u\n\n",(unsigned int)17856);
+
+	kprintf("Teste P-Variable:\n\n");
+
+	unsigned int adrr = (unsigned int) &i;
+	kprintf("soll: Fehler oder nichts\n");
+	kprintf("ist : %p\n\n\n\n", &i);
+*/
 
     kprintf("Teste Symbole und sonderfälle:\n\n");
 
@@ -231,6 +261,20 @@ static inline void test_kprintf(void) {
 	//text mit variablen 
 	//check ob \0 den befehl beendet
 	
+	/*Bsprak mehr cases 
+0 cases und leere Strings
+
+Variablen wie im Einzel Case benutzen für ein Argument und dann alle variablen testen mit zu wenig Argumenten
+
+Bei falschen variablen wie bei einzeltest nur mit falsch gecarsteten args
+	*/
+
+	//notes sektion machen
+	/* -2147483648 
+ 	2147483647
+	Signed int
+	4294967295
+unsigned int */
 	
 
 	kprintf("Ende Test Aufgabe 2 ------------------------------------------------------------------------------:\n\n\n\n\n");
