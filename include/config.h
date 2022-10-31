@@ -24,6 +24,22 @@ static inline void test_kprintf(void) {
 	 * nach dem vollständigen initialisieren aufrufen
 	 */
 	kprintf("kprintf_test\n\n");
+	//NOTES:
+	/*
+	FEHLER: ohne , &h) gibt &p 0x0 aus 
+    %p zeigt bei keinem argument 0x
+	fehler manche nehmen das letzte argument wieder wenn sie kein neues bekommen
+	
+	nach sollwert für fehler fragen alles vorher ausgeben dann fehler und return ?
+	//\   alleine kommentiert die untere zeile mit ?
+	
+	//"" geht nicht 
+    //" geht auch nicht
+    //bei \\n kommt \n als ausgabe
+    //sollte 32 bit nicht nur bis 429496729 gehen ?
+	
+	*/
+	
 	
     kprintf("Test für Aufgabe 2:\n\n");
 	
@@ -50,10 +66,10 @@ static inline void test_kprintf(void) {
 	kprintf("soll: 0\n");
     kprintf("ist : %x\n\n",(unsigned int)0);
 
-	kprintf("soll: C\n");
+	kprintf("soll: c\n");
     kprintf("ist : %x\n\n",(unsigned int)12);
 
-	kprintf("soll: 8FB6E\n");
+	kprintf("soll: 8fb6e\n");
     kprintf("ist : %x\n\n\n",(unsigned int)588654);
 
 	kprintf("Teste I-Variable:\n\n");
@@ -112,7 +128,7 @@ static inline void test_kprintf(void) {
 
 	kprintf("Teste x-Variable:\n\n");
 	
-	kprintf("soll: 134F_19_310_EFE_ACDC\n");
+	kprintf("soll: 134f_19_310_efe_acdc\n");
 	unsigned int hex_1 = 4943;
 	unsigned int hex_2 = 25;
 	unsigned int hex_3 = 784;
@@ -164,138 +180,306 @@ static inline void test_kprintf(void) {
     
 	int q = 65;
 	unsigned int adrr4 = (unsigned int) &h;
-	kprintf("soll: ein String A8FB6E-1785621*-34782 0x%x, 2mal Prozent\n", adrr4);
+	kprintf("soll: ein String A8fb6e-1785621*-34782 0x%x, 2mal Prozent\n", adrr4);
 	const char* strung = "ein String \0";
 	
     kprintf("ist : %s%c%x-%u*%i %p, %%%%\n\n\n\n", strung, q, (unsigned int)588654, (unsigned int)1785621, (int)-34782, &h);
     
-    //FEHLER: ohne , &h) gibt &p 0x0 aus 
-
-
-    kprintf("Teste Prozentzeichen ohne Variable:\n\n");
-    //% ohne Arg =>Fehler 
-    // mit oder ohne komma? [...", variable) oder ...")]
     
-    //%p zeigt bei keinem argument 0x
+    
+    kprintf("Teste Prozentzeichen ohne Variable:\n\n");
+    //FEHLER: soll ?
+    //nur bei c ist die weitere ausgabe woanders
+    
     kprintf("Teste nur ein Prozentzeichen:\n\n");
     
-    kprintf("soll: nichts oder Fehler\n");
-    kprintf("ist : % \n\n\n");
+    kprintf("soll: irgendwas_\n");
+    kprintf("ist : irgendwas_%komisches \n\n\n");
     
     kprintf("Teste C-Variable:\n\n");
 	
-    kprintf("soll: nichts oder Fehler\n");
-    kprintf("ist : %c\n\n\n");
+    kprintf("soll: irgendwas_\n");
+    kprintf("ist : irgendwas_%ckomisches\n\n\n");
 
 	kprintf("Teste S-Variable:\n\n");
 	
-	kprintf("soll: nichts oder Fehler\n");
-    kprintf("ist : %s\n\n\n");
+	kprintf("soll: irgendwas_\n");
+    kprintf("ist : irgendwas_%skomisches\n\n\n");
 
 	kprintf("Teste x-Variable:\n\n");
 	
-	kprintf("soll: nichts oder Fehler\n");
-    kprintf("ist : %x\n\n\n");
+	kprintf("soll: irgendwas_\n");
+    kprintf("ist : irgendwas_%xkomisches\n\n\n");
 
 	kprintf("Teste I-Variable:\n\n");
 	
-	kprintf("soll: nichts oder Fehler\n");
-    kprintf("ist : %i\n\n\n");
+	kprintf("soll: irgendwas_\n");
+    kprintf("ist : irgendwas_%ikomisches\n\n\n");
 
 	kprintf("Teste U-Variable:\n\n");
 	
-	kprintf("soll: nichts oder Fehler\n");
-    kprintf("ist : %u\n\n\n");
+	kprintf("soll: irgendwas_\n");
+    kprintf("ist : irgendwas_%ukomisches\n\n\n");
 
 	kprintf("Teste P-Variable:\n\n");
 	
-	kprintf("soll: nichts oder Fehler\n");
-    kprintf("ist : %p\n\n\n\n");
+	kprintf("soll: irgendwas_\n");
+    kprintf("ist : irgendwas_%pkomisches\n\n\n\n");
 	
-	//fehler manche nehmen das letzte argument wieder
+	
         
     kprintf("Teste Variablen mit unzureichend vielen argumenten:\n\n");
-    //3->2
-    //2->1
+    
+    //FEHLER: soll ?
+    
+    kprintf("Teste C-Variable:\n\n");
+	
+    kprintf("soll: irgendwas_A\n");
+    kprintf("ist : irgendwas_%c%ckomisches\n\n\n", i);
+
+	kprintf("Teste S-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_A\n");
+    kprintf("ist : irgendwas_%c%skomisches\n\n\n", i);
+
+	kprintf("Teste x-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_A\n");
+    kprintf("ist : irgendwas_%c%xkomisches\n\n\n", i);
+
+	kprintf("Teste I-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_A\n");
+    kprintf("ist : irgendwas_%c%ikomisches\n\n\n", i);
+
+	kprintf("Teste U-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_A\n");
+    kprintf("ist : irgendwas_%c%ukomisches\n\n\n", i);
+
+	kprintf("Teste P-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_A\n");
+    kprintf("ist : irgendwas_%c%pkomisches\n\n\n\n", i);
+    
+
 
 	kprintf("Teste Verhalten bei Variablen mit falschen Argumenten:\n\n");
 	
-    //Bei i und u Test Werte nehmen die die anderen nicht 	nehmen können ? Werte Bereich und negatives ?
-/*
-	kprintf("soll: Fehler oder nichts\n");
-	kprintf("ist : %c\n\n\n", i);
+	kprintf("Teste C-Variable:\n\n");
+	//FEHLER: soll ?
+	
+	char t = 's';
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%ckomisches\n\n\n", t);
 
 	kprintf("Teste S-Variable:\n\n");
 
-	kprintf("soll: Fehler oder nichts\n");
-	kprintf("ist : %s\n\n\n", string);
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%skomisches\n\n\n", (int) 673999);
 
 	kprintf("Teste x-Variable:\n\n");
 
-	kprintf("soll: Fehler oder nichts\n");
-	kprintf("ist : %x\n\n\n",(unsigned int)588654);
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%xkomisches\n\n\n", (int) -588654);
+	
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%xkomisches\n\n\n", t);
 
 	kprintf("Teste I-Variable:\n\n"); 
 
-	kprintf("soll: Fehler oder nichts\n");
-	kprintf("ist : %i\n\n\n",(int)-347825612);
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%ikomisches\n\n\n", (unsigned int) 429496729);
+	
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%ikomisches\n\n\n", t);
 
 	kprintf("Teste U-Variable:\n\n");
 
-	kprintf("soll: Fehler oder nichts\n");
-	kprintf("ist : %u\n\n",(unsigned int)17856);
-
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%ukomisches\n\n", (int) -588654);
+	
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%ukomisches\n\n\n", t);
+	
 	kprintf("Teste P-Variable:\n\n");
 
-	unsigned int adrr = (unsigned int) &i;
-	kprintf("soll: Fehler oder nichts\n");
-	kprintf("ist : %p\n\n\n\n", &i);
-*/
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%pkomisches\n\n\n\n", i);
+	
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%pkomisches\n\n\n\n", t);
+	
+	kprintf("soll: irgendwas_A\n");
+	kprintf("ist : irgendwas_%pkomisches\n\n\n\n", (int) -4763746);
+
 
     kprintf("Teste Symbole und sonderfälle:\n\n");
 
-    //teste symbole zb ""
-    //ausgabe von nichts leere strings und zeug
+    //Fehler
     
-    //mit variablen übertreiben
-	//text mit variablen 
-	//check ob \0 den befehl beendet
+    kprintf("%§$/()§=?:""=]#'-_\[/d\\n\n\n\n\n");
+    
+    
+    kprintf("Teste 0 bzw leere strings:\n\n");
+    
+    kprintf("Teste C-Variable:\n\n");
 	
-	/*Bsprak mehr cases 
-0 cases und leere Strings
+    kprintf("soll: irgendwas_NULL\n");
+    kprintf("ist : irgendwas_%c\n\n\n", (unsigned int) 0);
 
-Variablen wie im Einzel Case benutzen für ein Argument und dann alle variablen testen mit zu wenig Argumenten
-
-Bei falschen variablen wie bei einzeltest nur mit falsch gecarsteten args
-	*/
-
-	//notes sektion machen
-	/* -2147483648 
- 	2147483647
-	Signed int
-	4294967295
-unsigned int */
+	kprintf("Teste S-Variable:\n\n");
 	
+	kprintf("soll: irgendwas__\n");
+    kprintf("ist : irgendwas_%s_\n\n\n", (char*) "");
+    
+    kprintf("soll: irgendwas_ _\n");
+    kprintf("ist : irgendwas_%s_\n\n\n", (char*) " ");
 
+	kprintf("Teste x-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_0\n");
+    kprintf("ist : irgendwas_%x\n\n\n", (unsigned int) 0);
+
+	kprintf("Teste I-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_0\n");
+    kprintf("ist : irgendwas_%i\n\n\n", (int) 0);
+
+	kprintf("Teste U-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_0\n");
+    kprintf("ist : irgendwas_%u\n\n\n", (unsigned int) 0);
+
+	kprintf("Teste P-Variable:\n\n");
+	
+	kprintf("bei %%p geht NULL nicht\n");
+
+    
+    kprintf("Teste NULL als arg:\n\n");
+    
+    kprintf("NULL als arg sorgt für compilier Fehler\n\n\n");
+    
+	//check ob \0 wirkleich den befehl beendet
+	
+	kprintf("soll: irgendwas_komisches passiert hie\n");
+    kprintf("ist : irgendwas_komisches passiert hie\0r");
+    kprintf("\n\n\n");
+	
+    kprintf("Teste große unsigned und signed Werte:\n\n");
+    //-2147483648 bis 2147483647 :=> Signed int, 429496729 unsigned int 
+
+	kprintf("Teste I-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_-2147483648\n");
+    kprintf("ist : irgendwas_%i\n\n\n", (int) -2147483648);
+
+	kprintf("Teste U-Variable:\n\n");
+	
+	kprintf("soll: irgendwas_429496729\n");
+    kprintf("ist : irgendwas_%u\n\n\n\n", (unsigned int) 4294967629);
+    
+	
+	
 	kprintf("Ende Test Aufgabe 2 ------------------------------------------------------------------------------:\n\n\n\n\n");
     
     kprintf("Test für Aufgabe 3:\n\n");
     kprintf("Teste Feldbreite 8 linksseitig mit Leerzeichen aufgefüllt:\n\n");
-    	//negative und positive Zahlen
-    	//nur i u x p
+    
+    //vorher und danach nichts schreiben 
+    //8 Feld breit mit 0x oder ohne 0x bei %p
+    
+    //unfertig
+    kprintf("Teste x-Variable:\n\n");
+	
+	kprintf("soll: 0\n");
+    kprintf("ist : %x\n\n",(unsigned int)0);
+
+	kprintf("Teste i-Variable:\n\n");
+
+	kprintf("soll: -3478922\n");
+    kprintf("ist : %i\n\n\n",(int) -3478922);
+
+	kprintf("Teste u-Variable:\n\n");
+	
+	kprintf("soll:  1785621\n");
+    kprintf("ist : %u\n\n",(unsigned int) 1785621);
+
+	kprintf("Teste p-Variable:\n\n");
+	
+	kprintf("soll: 0x%x (nur gültig wenn %%x geht)\n", adrr);
+    kprintf("ist : %p\n\n", &i);
+    
+    
+    
     kprintf("Teste Verhalten bei Feldbreite über 8:\n\n");
+    
+    //Unfertig
+    kprintf("Teste x-Variable:\n\n");
+	
+	kprintf("soll: 0\n");
+    kprintf("ist : %x\n\n",(unsigned int)0);
+
+	kprintf("Teste i-Variable:\n\n");
+
+	kprintf("soll: -3478922\n");
+    kprintf("ist : %i\n\n\n",(int) -3478922);
+
+	kprintf("Teste u-Variable:\n\n");
+	
+	kprintf("soll:  1785621\n");
+    kprintf("ist : %u\n\n",(unsigned int) 1785621);
+
+	kprintf("Teste p-Variable:\n\n");
+	
+	kprintf("soll: 0x%x (nur gültig wenn %%x geht)\n", adrr);
+    kprintf("ist : %p\n\n", &i);
 
     kprintf("Ende Test Aufgabe 3 ------------------------------------------------------------------------------:\n\n\n\n\n");
     
     kprintf("Test für Aufgabe 4:\n\n");
     kprintf("Teste Feldbreite 8 linksseitig mit 0en aufgefüllt:\n\n");
-        //negative und positive Zahlen
-        //nur i u x 
+        
+    
+    //Unfertig 
+    //denk an aufrufart
+        
+    kprintf("Teste x-Variable:\n\n");
+	
+	kprintf("soll: 0\n");
+    kprintf("ist : %x\n\n",(unsigned int)0);
+
+	kprintf("Teste i-Variable:\n\n");
+
+	kprintf("soll: -3478922\n");
+    kprintf("ist : %i\n\n\n",(int) -3478922);
+
+	kprintf("Teste u-Variable:\n\n");
+	
+	kprintf("soll:  1785621\n");
+    kprintf("ist : %u\n\n",(unsigned int) 1785621);
+        
     kprintf("ist : hallo %%0 ERROR expected %%08!\n");
     kprintf("ist : hallo %06 \n\n");
     
     kprintf("Teste Verhalten bei Feldbreite über 8:\n\n");
         //negative und positive Zahlen (kann das minus verschwinden ?)
+    
+    //unfertig
+    kprintf("Teste x-Variable:\n\n");
+	
+	kprintf("soll: 0\n");
+    kprintf("ist : %x\n\n",(unsigned int)0);
+
+	kprintf("Teste i-Variable:\n\n");
+
+	kprintf("soll: -3478922\n");
+    kprintf("ist : %i\n\n\n",(int) -3478922);
+
+	kprintf("Teste u-Variable:\n\n");
+	
+	kprintf("soll:  1785621\n");
+    kprintf("ist : %u\n\n",(unsigned int) 1785621);
 
     kprintf("Ende Test Aufgabe 4 ------------------------------------------------------------------------------:\n\n\n\n\n");
     
