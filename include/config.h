@@ -42,8 +42,10 @@ static inline void test_kprintf(void) {
     //8 Feld breit mit 0x oder ohne 0x bei %p
 	
 	*/
+	int i = 65;
+	unsigned int adrr = (unsigned int) &i;
 	
-	
+	/*
     kprintf("Test für Aufgabe 2:\n\n");
 	
     kprintf("Teste Print ohne Variablen:\n\n");
@@ -55,7 +57,7 @@ static inline void test_kprintf(void) {
 	kprintf("Teste C-Variable:\n\n");
 	
     kprintf("soll: A\n");
-    int i = 65;
+    
     kprintf("ist : %c\n\n\n", i);
 
 	kprintf("Teste S-Variable:\n\n");
@@ -96,7 +98,6 @@ static inline void test_kprintf(void) {
 
 	kprintf("Teste P-Variable:\n\n"); //??????????????
 	
-	unsigned int adrr = (unsigned int) &i;
 	
 	kprintf("soll: 0x%x (nur gültig wenn %%x geht)\n", adrr);
     kprintf("ist : %p\n\n", &i);
@@ -188,7 +189,7 @@ static inline void test_kprintf(void) {
 	
     kprintf("ist : %s%c%x-%u*%i %p, %%%%\n\n\n\n", strung, q, (unsigned int)588654, (unsigned int)1785621, (int)-34782, &h);
     
-    
+    */
     
     kprintf("Teste Prozentzeichen ohne Variable:\n\n");
     //FEHLER: soll ?
@@ -273,47 +274,47 @@ static inline void test_kprintf(void) {
 	//FEHLER: soll ?
 	
 	char t = 's';
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%ckomisches\n\n\n", t);
 
 	kprintf("Teste S-Variable:\n\n");
 
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%skomisches\n\n\n", (int) 673999);
 
 	kprintf("Teste x-Variable:\n\n");
 
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%xkomisches\n\n\n", (int) -588654);
 	
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%xkomisches\n\n\n", t);
 
 	kprintf("Teste I-Variable:\n\n"); 
 
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%ikomisches\n\n\n", (unsigned int) 429496729);
 	
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%ikomisches\n\n\n", t);
 
 	kprintf("Teste U-Variable:\n\n");
 
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%ukomisches\n\n", (int) -588654);
 	
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%ukomisches\n\n\n", t);
 	
 	kprintf("Teste P-Variable:\n\n");
 
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%pkomisches\n\n\n\n", i);
 	
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%pkomisches\n\n\n\n", t);
 	
-	kprintf("soll: irgendwas_A\n");
+	kprintf("soll: irgendwas_\n");
 	kprintf("ist : irgendwas_%pkomisches\n\n\n\n", (int) -4763746);
 
 
@@ -328,9 +329,11 @@ static inline void test_kprintf(void) {
     
     kprintf("Teste C-Variable:\n\n");
 	
+    //FEHLER
     kprintf("soll: irgendwas_NULL\n");
     kprintf("ist : irgendwas_%c\n\n\n", (unsigned int) 0);
 
+	/*
 	kprintf("Teste S-Variable:\n\n");
 	
 	kprintf("soll: irgendwas__\n");
@@ -368,6 +371,7 @@ static inline void test_kprintf(void) {
 	kprintf("soll: irgendwas_komisches passiert hie\n");
     kprintf("ist : irgendwas_komisches passiert hie\0r");
     kprintf("\n\n\n");
+	*/
 	
     kprintf("Teste große unsigned und signed Werte:\n\n");
     //-2147483648 bis 2147483647 :=> Signed int, 429496729 unsigned int 
@@ -376,7 +380,7 @@ static inline void test_kprintf(void) {
 	
 	kprintf("soll: irgendwas_-2147483648\n");
     kprintf("ist : irgendwas_%i\n\n\n", (int) -2147483648);
-
+	
 	kprintf("Teste U-Variable:\n\n");
 	
 	kprintf("soll: irgendwas_429496729\n");
@@ -389,35 +393,35 @@ static inline void test_kprintf(void) {
     kprintf("Test für Aufgabe 3:\n\n");
     kprintf("Teste Feldbreite 8 linksseitig mit Leerzeichen aufgefüllt:\n\n");
     
-    
+    /*
 	kprintf("Teste x-Variable:\n\n");
 	kprintf("soll: Hi ich bin   bee76.\n"); 
 	kprintf("ist : Hi ich bin%8x.\n\n", (unsigned int) 781942);
 
 	kprintf("Teste i-Variable:\n\n");
 	kprintf("soll: *  -34789*\n");
-	kprintf("ist : *%8i*\n\n\n",(int) -34789);
+	kprintf("ist : *%8i*\n\n\n",(int) -34789); */
 
 	kprintf("Teste u-Variable:\n\n");
 	kprintf("soll: &&      21&&\n");
 	kprintf("ist : &&%8u&&\n\n",(unsigned int) 21);
 
 	kprintf("Teste p-Variable:\n\n");
-	kprintf("soll: Adresse:0x%x() (nur gültig wenn %%x geht selbst die Stellen zählen)\n", adrr);
+	kprintf("soll: Adresse: 0x%x() (selbst die Stellen zählen)\n", adrr);
 	kprintf("ist : Adresse:%8p()\n\n", &i);
     
     
     
     kprintf("Teste Verhalten bei Feldbreite über 8:\n\n");
     
+    kprintf("Sollten an sich alle abrechnen oder abschneiden\n"); 
     
     kprintf("Teste x-Variable:\n\n");
-	kprintf("soll: Hi ich bin,b67ee76df.\n Sollte abrechnen oder ?"); 
-	kprintf("ist : Hi ich bin,%8x.\n\n", (unsigned int) 48988321503);
-	//zugroßes unsigned ?
+	kprintf("soll: Hi ich bin,b67ee76df.\n"); 
+	kprintf("ist : Hi ich bin,%8x.\n\n", (unsigned int) 48988321503); //zugroßes unsigned ?
 
 	kprintf("Teste i-Variable:\n\n");
-	kprintf("soll: *  -34789887*\n");
+	kprintf("soll: *-34789887*\n");
 	kprintf("ist : *%8i*\n\n\n",(int) -34789887);
 
 	kprintf("Teste u-Variable:\n\n");
@@ -453,10 +457,11 @@ static inline void test_kprintf(void) {
 	kprintf("ist : &&%08u&&\n\n",(unsigned int) 0);
     
     kprintf("Teste Verhalten bei Feldbreite über 8:\n\n"); //negative und positive Zahlen (kann das minus verschwinden ?)
-   
+   	
+   	kprintf("Sollten an sich alle abrechnen oder abschneiden\n");
     
 	kprintf("Teste x-Variable:\n\n");
-	kprintf("soll: Hi ich bin,b67ee76df.\n Sollte abrechnen oder ?\n"); 
+	kprintf("soll: Hi ich bin,b67ee76df.\n"); 
 	kprintf("ist : Hi ich bin,%8x.\n\n", (unsigned int) 48988321503); //zugroßes unsigned ?
 
 	kprintf("Teste i-Variable:\n\n");
@@ -470,6 +475,9 @@ static inline void test_kprintf(void) {
     kprintf("Ende Test Aufgabe 4 ------------------------------------------------------------------------------:\n\n\n\n\n");
     
     //Befehl %06 und so testen ? 
+    kprintf("Teste Befehl %%06 unf %%7:\n\n");
+	kprintf("ist : &&%06u&&\n\n",(unsigned int) 5633821);
+	kprintf("ist : &&%7u&&\n\n",(unsigned int) 5633851);
 }
 
 /**
