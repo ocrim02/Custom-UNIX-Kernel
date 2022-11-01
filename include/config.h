@@ -485,6 +485,87 @@ static inline void test_kprintf(void) {
     
     //kprintf einzeilig mit \n trennen und aufrufen 
     //zb kprintf(" soll: 3 Prozentzeichen zwichen Leerzeichen\n ist : %% %% %% \n\n");
+
+	Aufgabe 3 bei unter 8 Feld
+	
+//Bei %p zählt 0x auch in die 8 Felder 
+
+kprintf("Teste x-Variable:\n\n");
+kprintf("soll: Hi ich bin   bee76.\n"); 
+kprintf("ist : Hi ich bin%8x.\n\n", (unsigned int) 781942);
+
+kprintf("Teste i-Variable:\n\n");
+kprintf("soll: *  -34789*\n");
+kprintf("ist : *%8i*\n\n\n",(int) -34789);
+
+kprintf("Teste u-Variable:\n\n");
+kprintf("soll: &&      21&&\n");
+kprintf("ist : &&%8u&&\n\n",(unsigned int) 21);
+
+kprintf("Teste p-Variable:\n\n");
+kprintf("soll: Adresse:0x%x() (nur gültig wenn %%x geht selbst die Stellen zählen)\n", adrr);
+kprintf("ist : Adresse:%8p()\n\n", &i);
+
+Feld über 8
+//soll sich überall Fehler machen 
+
+kprintf("Teste x-Variable:\n\n");
+kprintf("soll: Hi ich bin,b67ee76df.\n Sollte abrechnen oder ?"); 
+kprintf("ist : Hi ich bin,%8x.\n\n", (unsigned int) 48988321503);
+//zugroßes unsigned ?
+
+kprintf("Teste i-Variable:\n\n");
+kprintf("soll: *  -34789887*\n");
+kprintf("ist : *%8i*\n\n\n",(int) -34789887);
+
+kprintf("Teste u-Variable:\n\n");
+kprintf("soll: &&563367821&&\n");
+kprintf("ist : &&%8u&&\n\n",(unsigned int) 563367821);
+
+kprintf("Teste p-Variable:\n\n");
+kprintf("soll: Adresse:0x%x() (nur gültig wenn %%x geht selbst die Stellen zählen)\n", adrr);
+kprintf("ist : Adresse:%8p()\n\n", &i);
+// ist hier overflow möglich?
+
+
+Aufgabe 4 bei unter 08 Feld
+//Bei %p zählt 0x auch in die 8 Felder 
+
+kprintf("Teste x-Variable:\n\n");
+kprintf("soll: Hi ich bin000bee76.\n"); 
+kprintf("ist : Hi ich bin%08x.\n\n", (unsigned int) 781942);
+
+kprintf("Teste i-Variable:\n\n");
+kprintf("soll: *-0034789*\n");
+kprintf("ist : *%08i*\n\n\n",(int) -34789);
+
+kprintf("Teste u-Variable:\n\n");
+kprintf("soll: &&00000021&&\n");
+kprintf("ist : &&%08u&&\n\n",(unsigned int) 21);
+
+kprintf("Teste u-Variable:\n\n");
+kprintf("soll: &&00000000&&\n");
+kprintf("ist : &&%08u&&\n\n",(unsigned int) 0);
+
+
+Feld über 08
+
+//soll sich überall Fehler machen 
+
+kprintf("Teste x-Variable:\n\n");
+kprintf("soll: Hi ich bin,b67ee76df.\n Sollte abrechnen oder ?"); 
+kprintf("ist : Hi ich bin,%8x.\n\n", (unsigned int) 48988321503);
+//zugroßes unsigned ?
+
+kprintf("Teste i-Variable:\n\n");
+kprintf("soll: *  -34789887*\n");
+kprintf("ist : *%8i*\n\n\n",(int) -34789887);
+
+kprintf("Teste u-Variable:\n\n");
+kprintf("soll: &&563367821&&\n");
+kprintf("ist : &&%8u&&\n\n",(unsigned int) 563367821);
+
+Befehl %06 und so
     
 }
 
