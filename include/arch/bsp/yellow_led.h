@@ -1,6 +1,6 @@
 #ifndef YELLOW_LED_H
 #define YELLOW_LED_H
 
-void yellow_on(void);
+void light_row(void);
 
 #endif
