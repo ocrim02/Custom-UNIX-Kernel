@@ -5,8 +5,12 @@
 #define VOID_SIZE 32
 #define MAX_INT_STRING_SIZE 11
 #define MAX_UNSIGNED_INT_STRING_SIZE 10
+#define NULL ((void *)0)
 
-
+/*
+ * own version of std printf()
+ * almost same functionallity
+ */
 void kprintf(char* string, ...)
 {
     
@@ -29,7 +33,6 @@ void kprintf(char* string, ...)
             }
             else if(character == '0'){
                 if(*string++ != '8'){
-                    //error
                     kprintf("\nERROR expected %%08!\n");
                     return;
                 }
@@ -50,28 +53,28 @@ void kprintf(char* string, ...)
             else if(character == 'x'){
                 unsigned int value = va_arg(ap, unsigned int);
                 char* number = eight_number(unsigned_int_to_hex_str(value), spaces, zeros);
-                if(number == 1){return;}
+                if(number == NULL){return;}
                 kprintf(number);
                 character = *string++;
             }
             else if(character == 'i'){
                 int value = va_arg(ap, int);
                 char* number = eight_number(int_to_dec_str(value), spaces, zeros);
-                if(number == 1){return;}
+                if(number == NULL){return;}
                 kprintf(number);
                 character = *string++;
             }
             else if(character == 'u'){
                 unsigned int value = va_arg(ap, unsigned int);
                 char* number = eight_number(unsigned_int_to_dec_str(value), spaces, zeros);
-                if(number == 1){return;}
+                if(number == NULL){return;}
                 kprintf(number);
                 character = *string++;
             }
             else if(character == 'p'){
                 void* value = va_arg(ap, void*);
-                char* number = eight_number(void_to_hex_str(value), spaces, zeros);
-                if(number == 1){return;}
+                char* number = eight_number(void_to_hex_str(value), spaces, false);
+                if(number == NULL){return;}
                 kprintf(number);
                 character = *string++;
             }
@@ -91,10 +94,10 @@ void kprintf(char* string, ...)
     return;
 }
 
-
-//returns unsigned int of an masked unsigned int
-//high -> msb position
-//low -> lsb position
+/* 
+ * takes unsigned int value and two bit positions msb >= lsb
+ * returns msb to lsb from value (shifted to first bit)
+ */
 unsigned int read_masked(unsigned int value, int msb, int lsb)
 {
     unsigned int mask = 0;
@@ -105,6 +108,10 @@ unsigned int read_masked(unsigned int value, int msb, int lsb)
     return value & mask;
 }
 
+/* 
+ * reverse function of read_masked 
+ * writes src to dest(msb downto lsb) without changing other bits
+ */
 unsigned int write_masked (unsigned int dest, unsigned int src, int msb, int lsb)
 {
     unsigned int mask = 0;
@@ -118,25 +125,43 @@ unsigned int write_masked (unsigned int dest, unsigned int src, int msb, int lsb
     return dest;
 }
 
-//returns a number string with 8 characters 
-//if spaces == true it will be filled up with spaces
-//if zeros == true it will be filled up with zeros
-//only one is allowed to be set to true
+/*
+ * returns a number string with 8 characters if one bool is set true, else return number
+ * if spaces == true it will be filled up with spaces
+ * if zeros == true it will be filled up with zeros
+ * only one is allowed to be set to true
+ */
 char* eight_number(char* number, bool spaces, bool zeros)
 {
     if(spaces == true && zeros == true){
         kprintf("\nERROR while calling eight_number(char*, bool, bool), only one bool can be set True.\n");
     }
+
     int len = str_len(number);
+
+    //fill with spaces
     if(spaces == true && len <= 8){
-        static char extendet_number[9] = "        ";
+        //init char array
+        static char extendet_number[9];
+        for(int i=0; i<8; i++){
+            extendet_number[i] = ' ';
+        }
+        extendet_number[8] = '\0';
+
         for(int i=0; i<len; i++){
             extendet_number[8-len+i] = number[i];
         }
         return extendet_number;
     }
+    //fill with zeros
     else if(zeros == true && len <= 8){
-        static char extendet_number[9] = "00000000";
+        //init char array
+        static char extendet_number[9];
+        for(int i=0; i<8; i++){
+            extendet_number[i] = '0';
+        }
+        extendet_number[8] = '\0';
+
         if(*number == '-'){
             extendet_number[0] = '-';
             for(int i=1; i<len; i++){
@@ -150,10 +175,10 @@ char* eight_number(char* number, bool spaces, bool zeros)
         }
         return extendet_number;
     }
+    //error number to big
     else if((zeros == true || spaces == true) && len > 8){
-        //error number to big
         kprintf("\nERROR while calling eight_number(char*, bool, bool), char* is longer than 8 characters.\n");
-        return 1;
+        return NULL;
     }
     else{
         return number;
@@ -161,7 +186,9 @@ char* eight_number(char* number, bool spaces, bool zeros)
     
 }
 
-//length of string without '\0'
+/*
+ * length of string without '\0'
+ */
 int str_len(char* string)
 {
     int counter = 0;
@@ -172,7 +199,9 @@ int str_len(char* string)
     return counter;
 }
 
-//converts unsigned int to char array
+/* 
+ * converts unsigned int to char array
+ */
 char* unsigned_int_to_dec_str (unsigned int value)
 {
     static char string[MAX_UNSIGNED_INT_STRING_SIZE + 1];
@@ -208,7 +237,9 @@ char* unsigned_int_to_dec_str (unsigned int value)
     return string;
 }
 
-//converts int to char array
+/*
+ * converts int to char array
+ */
 char* int_to_dec_str (int value)
 {
     static char string[MAX_INT_STRING_SIZE + 1];
@@ -229,6 +260,9 @@ char* int_to_dec_str (int value)
 
 }
 
+/*
+ * converts an unsigned int to hex char array
+ */
 char* unsigned_int_to_hex_str(unsigned int value)
 {
     static char string[(UNSIGNED_INT_SIZE/4)+1];
@@ -271,6 +305,9 @@ char* unsigned_int_to_hex_str(unsigned int value)
     return string;
 }
 
+/*
+ * converts a void pointer to a hex char array
+ */
 char* void_to_hex_str(void* pointer)
 {
     static char string[(UNSIGNED_INT_SIZE/4)+3];

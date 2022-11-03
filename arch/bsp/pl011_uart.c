@@ -15,15 +15,9 @@ static volatile
 struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
 
 /*
-TODO:
-- to few or to much args -> mirco
-- comments -> stefan
-- error/function returns -> mirco
-- tests -> stefan
-- trennung von funktion und treiber -> mirco
-*/
-
-//implement FR checks
+ * read a single char from uart 
+ * gives a response via uart
+ */
 void read_uart(void)
 {
     //test_kprintf();
@@ -50,7 +44,6 @@ void read_uart(void)
         else{
             char character = (char) read_masked(dr, 7, 0);
             if(character != 0x0){
-                kprintf("%7\n", 0x0); 
                 kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
             }
         }
@@ -58,7 +51,9 @@ void read_uart(void)
     
 }
 
-//implement FR checks
+/*
+ * writes out character over uart
+ */
 void write_uart(char character)
 {
     //loop until not busy

@@ -11,7 +11,6 @@
 /// Es bietet sich jedoch an manche Funktionalitäten in andere
 /// Dateien aus zu lagern.
 
-#include <arch/bsp/yellow_led.h>
 #include <arch/bsp/pl011_uart.h>
 #include <config.h>
 
@@ -25,8 +24,7 @@ void increment_counter() {
 
 void start_kernel(){
 
-	
-	//test_kprintf();
+	test_kprintf();
 	read_uart();
 
 	// Endless counter
