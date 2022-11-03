@@ -30,7 +30,7 @@ void kprintf(char* string, ...)
             else if(character == '0'){
                 if(*string++ != '8'){
                     //error
-                    kprintf(" ERROR expected %%08!");
+                    kprintf("\nERROR expected %%08!\n");
                     return;
                 }
                 zeros = true;
@@ -49,27 +49,39 @@ void kprintf(char* string, ...)
             }
             else if(character == 'x'){
                 unsigned int value = va_arg(ap, unsigned int);
-                kprintf(eight_number(unsigned_int_to_hex_str(value), spaces, zeros));
+                char* number = eight_number(unsigned_int_to_hex_str(value), spaces, zeros);
+                if(number == 1){return;}
+                kprintf(number);
                 character = *string++;
             }
             else if(character == 'i'){
                 int value = va_arg(ap, int);
-                kprintf(eight_number(int_to_dec_str(value), spaces, zeros));
+                char* number = eight_number(int_to_dec_str(value), spaces, zeros);
+                if(number == 1){return;}
+                kprintf(number);
                 character = *string++;
             }
             else if(character == 'u'){
                 unsigned int value = va_arg(ap, unsigned int);
-                kprintf(eight_number(unsigned_int_to_dec_str(value), spaces, zeros));
+                char* number = eight_number(unsigned_int_to_dec_str(value), spaces, zeros);
+                if(number == 1){return;}
+                kprintf(number);
                 character = *string++;
             }
             else if(character == 'p'){
                 void* value = va_arg(ap, void*);
-                kprintf(eight_number(void_to_hex_str(value), spaces, false));
+                char* number = eight_number(void_to_hex_str(value), spaces, zeros);
+                if(number == 1){return;}
+                kprintf(number);
                 character = *string++;
             }
             else if(character == '%'){
                 write_uart('%');
                 character = *string++;
+            }
+            else{
+                kprintf("\nERROR single %%. Use %%%% if you want to print a single %%.\n");
+                return;
             }
 
         }
@@ -113,7 +125,7 @@ unsigned int write_masked (unsigned int dest, unsigned int src, int msb, int lsb
 char* eight_number(char* number, bool spaces, bool zeros)
 {
     if(spaces == true && zeros == true){
-        //error
+        kprintf("\nERROR while calling eight_number(char*, bool, bool), only one bool can be set True.\n");
     }
     int len = str_len(number);
     if(spaces == true && len <= 8){
@@ -138,10 +150,14 @@ char* eight_number(char* number, bool spaces, bool zeros)
         }
         return extendet_number;
     }
-    else{
+    else if((zeros == true || spaces == true) && len > 8){
         //error number to big
+        kprintf("\nERROR while calling eight_number(char*, bool, bool), char* is longer than 8 characters.\n");
+        return 1;
     }
-    return number;
+    else{
+        return number;
+    }
     
 }
 

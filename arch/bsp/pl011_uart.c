@@ -50,7 +50,7 @@ void read_uart(void)
         else{
             char character = (char) read_masked(dr, 7, 0);
             if(character != 0x0){
-                kprintf("test: %8i\n", -123456789); //error
+                kprintf("%7\n", 0x0); 
                 kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
             }
         }

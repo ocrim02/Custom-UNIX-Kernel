@@ -25,8 +25,9 @@ void increment_counter() {
 
 void start_kernel(){
 
-	//read_uart();
-	test_kprintf();
+	
+	//test_kprintf();
+	read_uart();
 
 	// Endless counter
 	for (;;) {
