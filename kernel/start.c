@@ -13,6 +13,8 @@
 
 #include <arch/bsp/pl011_uart.h>
 #include <config.h>
+#include <arch/cpu/interrupt.h>
+#include <arch/cpu/ivt.h>
 
 volatile unsigned int counter = 0;
 
@@ -21,11 +23,36 @@ void increment_counter() {
 }
 
 
-
 void start_kernel(){
+	set_ivt();
+	interrupt_setup();
 
-	test_kprintf();
-	read_uart();
+	while(1){
+		char character = read_uart();
+		kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
+		volatile unsigned int* test = (unsigned int*) 0x1; 
+		volatile unsigned int d;
+		switch(character){
+			case 'p':
+				//prefetch abort
+				create_prefetch_abort();
+				break;
+			case 's':
+				//supervisor call
+				create_supervisor_call();
+				break;
+			case 'a':
+				//data abort
+				create_data_abort();
+				break;
+			case 'u':
+				//undefined instruction
+				create_undefined_instruction();
+				break;
+	}
+
+	}
+	
 
 	// Endless counter
 	for (;;) {

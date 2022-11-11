@@ -5,7 +5,7 @@
 #include <config.h>
 #include <lib/utils.h>
 
-void read_uart(void);
+char read_uart(void);
 void write_uart(char);
 
 #endif

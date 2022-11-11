@@ -18,36 +18,35 @@ struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
  * read a single char from uart 
  * gives a response via uart
  */
-void read_uart(void)
+char read_uart(void)
 {
     //test_kprintf();
     unsigned int dr = 0;
-    while (1)
-    {
-        //wait for empty fifo
-        while(read_masked(regs->fr, 4, 4) == 1);
-        dr = regs->data;
 
-        //Error catches
-        if(dr & (1<<11)){
-            kprintf("Overrun Error\n");
-        }
-        else if(dr & (1<<10)){
-            kprintf("Break Error\n");
-        }
-        else if(dr & (1<<9)){
-            kprintf("Parity Error\n");
-        }
-        else if(dr & (1<<8)){
-            kprintf("Framing Error\n");
-        }
-        else{
-            char character = (char) read_masked(dr, 7, 0);
-            if(character != 0x0){
-                kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
-            }
+    //wait for empty fifo
+    while(read_masked(regs->fr, 4, 4) == 1);
+    dr = regs->data;
+
+    //Error catches
+    if(dr & (1<<11)){
+        kprintf("Overrun Error\n");
+    }
+    else if(dr & (1<<10)){
+        kprintf("Break Error\n");
+    }
+    else if(dr & (1<<9)){
+        kprintf("Parity Error\n");
+    }
+    else if(dr & (1<<8)){
+        kprintf("Framing Error\n");
+    }
+    else{
+        char character = (char) read_masked(dr, 7, 0);
+        if(character != 0x0){
+            return character;
         }
     }
+    return 0x0;
     
 }
 
