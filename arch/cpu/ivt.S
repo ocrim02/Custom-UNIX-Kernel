@@ -41,6 +41,33 @@ set_ivt:
 	mcr p15, 0, r0, c12, c0, 0
     mov pc, lr
 
+.global get_mode_regs
+get_mode_regs:
+    mov r1, r0
+	bl get_processor_mode
+    
+    msr cpsr_c, r1
+    mov r2, lr
+    mov r3, sp
+    mrs r4, spsr
+    stmfd sp!, {r2-r4}
+    msr cpsr_c, r0
+
+    mov r0, sp
+    mov pc, lr
+
+.global get_processor_mode
+get_processor_mode:
+    mrs r0, cpsr
+    mov r1, #7
+    mov r2, #0
+    stmfd sp!, {lr}
+    bl read_masked
+    ldmfd sp!, {pc}
+    //mov pc, lr
+
+
+
 _undefined_instruction:
     //set lr pipeline offset
     sub lr, lr, #4
@@ -79,12 +106,21 @@ _data_abort:
     //set lr pipeline offset
     sub lr, lr, #8
     stmfd sp!, {r0-r12,sp,lr}
+    mrs r0, cpsr
+    mrs r1, spsr_irq
+    mrs r2, spsr
+    mrs r3, spsr_und
+    mrs r4, spsr_svc
+    mrc p15, 0, r5, c5, c0, 0       //DFSR Data Fault Status 
+    mrc p15, 0, r6, c6, c0, 0       //DFAR Data Fault Address
+    stmfd sp!, {r0-r6}
 
     mov r0, #4
     mov r1, sp
     bl  interrupt
     //go back
     ldmfd r0, {r0-r12,sp,pc} ^
+    //cpsr = spsr_abt
 
 _not_used:
     //set lr pipeline offset
