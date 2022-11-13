@@ -10,5 +10,6 @@ void create_undefined_instruction();
 void create_data_abort();
 struct mode_regs* get_mode_regs(unsigned int);
 void set_ivt();
+unsigned int get_processor_mode();
 
 #endif

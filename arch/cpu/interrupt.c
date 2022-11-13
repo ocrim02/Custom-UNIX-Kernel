@@ -54,42 +54,80 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
     }
 }
 
-void mode_specific_regs(){
-    kprintf(">> Modusspezifische Register <<\n");
-    //kprintf("User/System | LR: 0x%08x | SP: 0x%08x\n", regs->usr_lr, regs->usr_sp);
-    struct mode_regs* regs = (struct mode_regs*) get_mode_regs(PSR_IRQ);
-    kprintf("IRQ         | LR: 0x%08x | SP: 0x%08x | SPSR: 0x%08x\n", regs->lr, regs->sp, regs->spsr);
-    regs = (struct mode_regs*) get_mode_regs(PSR_ABT);
-    kprintf("Abort       | LR: 0x%08x | SP: 0x%08x | SPSR: 0x%08x\n", regs->lr, regs->sp, regs->spsr);
-    regs = (struct mode_regs*) get_mode_regs(PSR_UND);
-    kprintf("Undefined   | LR: 0x%08x | SP: 0x%08x | SPSR: 0x%08x\n", regs->lr, regs->sp, regs->spsr);
-    regs = (struct mode_regs*) get_mode_regs(PSR_SVC);
-    kprintf("Supervisor  | LR: 0x%08x | SP: 0x%08x | SPSR: 0x%08x\n", regs->lr, regs->sp, regs->spsr);
+void spsr_info(unsigned int spsr){
+    if(spsr == 0){
+        kprintf(" | SPSR: ____ _ ___     Invalid 0x00000000\n");
+    }
+    else{
+        kprintf(" | SPSR: ");
+        if(read_masked(spsr, 31, 31) == 1){
+            kprintf("N");
+        }else{
+            kprintf("_");
+        }
+        if(read_masked(spsr, 30, 30) == 1){
+            kprintf("Z");
+        }else{
+            kprintf("_");
+        }
+        if(read_masked(spsr, 29, 29) == 1){
+            kprintf("C");
+        }else{
+            kprintf("_");
+        }
+        if(read_masked(spsr, 28, 28) == 1){
+            kprintf("V ");
+        }else{
+            kprintf("_ ");
+        }
+        if(read_masked(spsr, 9, 9) == 1){
+            kprintf("E ");
+        }else{
+            kprintf("_ ");
+        }
+        if(read_masked(spsr, 7, 7) == 1){
+            kprintf("I");
+        }else{
+            kprintf("_");
+        }
+        if(read_masked(spsr, 6, 6) == 1){
+            kprintf("F");
+        }else{
+            kprintf("_");
+        }
+        if(read_masked(spsr, 5, 5) == 1){
+            kprintf("T");
+        }else{
+            kprintf("_");
+        }
+        kprintf("  Supervisor 0x%08x\n", spsr);
+    }
 }
+
 
 void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs * regs){
     kprintf("############## EXCEPTION ##############\n");
     switch (mode){
-    case EX_DABT:
-        kprintf("Data Abort an Adresse: 0x%08x\n", regs->ar);
-        kprintf("Data Fault Status Register: 0x%08x\n", regs->sr);
-        kprintf("Data Fault Adress Register: 0x%08x\n", regs->ar);
-        break;
-    case EX_UND:
-        //kprintf("Undefined Instruction an Adresse: 0x%08x\n", regs->pc);
-        break;
-    case EX_PFABT:
-        //kprintf("Prefetch Abort an Adresse: 0x%08x\n", regs->pc);
-        break;
-    case EX_IRQ:
-        //kprintf("Interrupt an Adresse: 0x%08x\n", regs->pc);
-        break;
-    case EX_SVC:
-        //kprintf("Supervisor Call an Adresse: 0x%08x\n", regs->pc);
-        break;
-    
-    default:
-        break;
+        case EX_DABT:
+            kprintf("Data Abort an Adresse: 0x%08x\n", regs->pc);
+            kprintf("Data Fault Status Register: 0x%08x\n", regs->sr);
+            kprintf("Data Fault Adress Register: 0x%08x\n", regs->ar);
+            break;
+        case EX_UND:
+            //kprintf("Undefined Instruction an Adresse: 0x%08x\n", regs->pc);
+            break;
+        case EX_PFABT:
+            //kprintf("Prefetch Abort an Adresse: 0x%08x\n", regs->pc);
+            break;
+        case EX_IRQ:
+            //kprintf("Interrupt an Adresse: 0x%08x\n", regs->pc);
+            break;
+        case EX_SVC:
+            //kprintf("Supervisor Call an Adresse: 0x%08x\n", regs->pc);
+            break;
+        
+        default:
+            break;
     }
 
     kprintf("\n");
@@ -101,5 +139,18 @@ void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs * regs){
     kprintf("R4: 0x%08x  R9: 0x%08x\n", regs->r4, regs->r9);
     kprintf("\n");
 
-    mode_specific_regs();
+    kprintf(">> Modusspezifische Register <<\n");
+    kprintf("User/System | LR: 0x%08x | SP: 0x%08x\n", regs->lr, regs->sp);
+    struct mode_regs* mod_regs = (struct mode_regs*) get_mode_regs(PSR_IRQ);
+    kprintf("IRQ         | LR: 0x%08x | SP: 0x%08x", mod_regs->lr, mod_regs->sp);
+    spsr_info(mod_regs->spsr);
+    mod_regs = (struct mode_regs*) get_mode_regs(PSR_ABT);
+    kprintf("Abort       | LR: 0x%08x | SP: 0x%08x", mod_regs->lr, mod_regs->sp);
+    spsr_info(mod_regs->spsr);
+    mod_regs = (struct mode_regs*) get_mode_regs(PSR_UND);
+    kprintf("Undefined   | LR: 0x%08x | SP: 0x%08x", mod_regs->lr, mod_regs->sp);
+    spsr_info(mod_regs->spsr);
+    mod_regs = (struct mode_regs*) get_mode_regs(PSR_SVC);
+    kprintf("Supervisor  | LR: 0x%08x | SP: 0x%08x", mod_regs->lr, mod_regs->sp);
+    spsr_info(mod_regs->spsr);
 }

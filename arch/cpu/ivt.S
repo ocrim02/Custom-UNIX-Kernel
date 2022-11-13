@@ -43,15 +43,17 @@ set_ivt:
 
 .global get_mode_regs
 get_mode_regs:
+    stmfd sp!, {lr}
     mov r1, r0
 	bl get_processor_mode
-    
-    msr cpsr_c, r1
+    ldmfd sp!, {lr}
+
+    msr cpsr_cxsf, r1
     mov r2, lr
     mov r3, sp
     mrs r4, spsr
+    msr cpsr_cxsf, r0
     stmfd sp!, {r2-r4}
-    msr cpsr_c, r0
 
     mov r0, sp
     mov pc, lr
@@ -59,13 +61,7 @@ get_mode_regs:
 .global get_processor_mode
 get_processor_mode:
     mrs r0, cpsr
-    mov r1, #7
-    mov r2, #0
-    stmfd sp!, {lr}
-    bl read_masked
-    ldmfd sp!, {pc}
-    //mov pc, lr
-
+    mov pc, lr
 
 
 _undefined_instruction:
@@ -105,15 +101,14 @@ _prefetch_abort:
 _data_abort:
     //set lr pipeline offset
     sub lr, lr, #8
-    stmfd sp!, {r0-r12,sp,lr}
-    mrs r0, cpsr
-    mrs r1, spsr_irq
+    stmdb sp!, {r0-r12}
+    mrs r0, sp_usr
+    mrs r1, lr_usr
     mrs r2, spsr
-    mrs r3, spsr_und
-    mrs r4, spsr_svc
-    mrc p15, 0, r5, c5, c0, 0       //DFSR Data Fault Status 
-    mrc p15, 0, r6, c6, c0, 0       //DFAR Data Fault Address
-    stmfd sp!, {r0-r6}
+    mov r3, lr
+    mrc p15, 0, r4, c5, c0, 0       //DFSR Data Fault Status 
+    mrc p15, 0, r5, c6, c0, 0       //DFAR Data Fault Address
+    stmdb sp!, {r0-r5}
 
     mov r0, #4
     mov r1, sp

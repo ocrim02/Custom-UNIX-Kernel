@@ -14,6 +14,12 @@
 #define PSR_SYS (0x1f)
 
 struct dump_regs{
+    unsigned int sp;
+    unsigned int lr;
+    unsigned int spsr;
+    unsigned int pc;
+    unsigned int sr;
+    unsigned int ar;
     unsigned int r0;
     unsigned int r1;
     unsigned int r2;
@@ -27,15 +33,12 @@ struct dump_regs{
     unsigned int r10;
     unsigned int r11;
     unsigned int r12;
-    unsigned int sp;
-    unsigned int lr;
-    unsigned int cpsr;
-    unsigned int spsr_irq;
-    unsigned int spsr_abt;
-    unsigned int spsr_und;
-    unsigned int spsr_svc;
-    unsigned int sr;
-    unsigned int ar;
+    
+    
+    
+    
+    
+    
 };
 
 struct mode_regs{
@@ -62,6 +65,6 @@ void interrupt_setup();
 void reset();
 void interrupt(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs* regs);
-void mode_specific_regs();
+void spsr_info(unsigned int);
 
 #endif
