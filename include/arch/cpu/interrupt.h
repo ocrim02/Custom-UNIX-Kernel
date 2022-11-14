@@ -32,13 +32,7 @@ struct dump_regs{
     unsigned int r9;
     unsigned int r10;
     unsigned int r11;
-    unsigned int r12;
-    
-    
-    
-    
-    
-    
+    unsigned int r12; 
 };
 
 struct mode_regs{
@@ -48,8 +42,11 @@ struct mode_regs{
 };
 
 struct interrupt_enables{
+    unsigned int basic_pending;
+    unsigned int unused[3];
     unsigned int en1;
     unsigned int en2;
+    unsigned int base_enable;
 };
 
 enum EXCEPTION_MODE{
@@ -60,11 +57,13 @@ enum EXCEPTION_MODE{
 	EX_IRQ   = 5  // Interrupt
 };
 
-
+void data_fault_source(unsigned int);
+void instruction_fault_source(unsigned int);
 void interrupt_setup();
 void reset();
 void interrupt(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void spsr_info(unsigned int);
+void pendings();
 
 #endif

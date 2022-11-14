@@ -67,35 +67,59 @@ get_processor_mode:
 _undefined_instruction:
     //set lr pipeline offset
     sub lr, lr, #4
-    stmfd sp!, {r0-r12,sp,lr}
+    stmdb sp!, {r0-r12}
+    mrs r0, sp_usr
+    mrs r1, lr_usr
+    mrs r2, spsr
+    mov r3, lr
+    mov r4, #0
+    mov r5, #0
+    stmdb sp!, {r0-r5}
 
     mov r0, #1
     mov r1, sp
     bl  interrupt
-    //go back
+    //go back //probably faulty
     ldmfd r0, {r0-r12,sp,pc} ^
+    //cpsr = spsr_abt
     
 _software_interrupt:
     //set lr pipeline offset
     sub lr, lr, #4
-    stmfd sp!, {r0-r12,sp,lr}
+    stmdb sp!, {r0-r12}
+    mrs r0, sp_usr
+    mrs r1, lr_usr
+    mrs r2, spsr
+    mov r3, lr
+    mov r4, #0
+    mov r5, #0
+    stmdb sp!, {r0-r5}
 
     mov r0, #2
     mov r1, sp
     bl  interrupt
-    //go back
+    //go back //probably faulty
     ldmfd r0, {r0-r12,sp,pc} ^
+    //cpsr = spsr_abt
 
 _prefetch_abort:
     //set lr pipeline offset
     sub lr, lr, #4
-    stmfd sp!, {r0-r12,sp,lr}
+    stmdb sp!, {r0-r12}
+    mrs r0, sp_usr
+    mrs r1, lr_usr
+    mrs r2, spsr
+    mov r3, lr
+    mrc p15, 0, r4, c5, c0, 1       //IFSR Data Fault Status 
+    mrc p15, 0, r5, c6, c0, 2       //IFAR Data Fault Address
+    stmdb sp!, {r0-r5}
 
     mov r0, #3
     mov r1, sp
     bl  interrupt
-    //go back
+    //go back //probably faulty
     ldmfd r0, {r0-r12,sp,pc} ^
+    //cpsr = spsr_abt
     
 
 _data_abort:
@@ -113,39 +137,31 @@ _data_abort:
     mov r0, #4
     mov r1, sp
     bl  interrupt
-    //go back
+    //go back //probably faulty
     ldmfd r0, {r0-r12,sp,pc} ^
     //cpsr = spsr_abt
 
 _not_used:
-    //set lr pipeline offset
-    sub lr, lr, #4
-    stmfd sp!, {r0-r12,sp,lr}
 
-    mov r0, #1
-    mov r1, sp
-    bl  interrupt
-    //go back
-    ldmfd r0, {r0-r12,sp,pc} ^
 
 _irq:
     //set lr pipeline offset
     sub lr, lr, #8
-    stmfd sp!, {r0-r12,sp,lr}
+    stmdb sp!, {r0-r12}
+    mrs r0, sp_usr
+    mrs r1, lr_usr
+    mrs r2, spsr
+    mov r3, lr
+    mov r4, #0
+    mov r5, #0
+    stmdb sp!, {r0-r5}
 
     mov r0, #5
     mov r1, sp
     bl  interrupt
-    //go back
+    //go back //probably faulty
     ldmfd r0, {r0-r12,sp,pc} ^
+    //cpsr = spsr_abt
 
 _fiq:
-    //set lr pipeline offset
-    sub lr, lr, #8
-    stmfd sp!, {r0-r12,sp,lr}
-
-    mov r0, #1
-    mov r1, sp
-    bl  interrupt
-    //go back
-    ldmfd r0, {r0-r12,sp,pc} ^
+    

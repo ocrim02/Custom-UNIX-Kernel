@@ -14,6 +14,7 @@
 #include <arch/bsp/pl011_uart.h>
 #include <config.h>
 #include <arch/cpu/interrupt.h>
+#include <arch/cpu/timer.h>
 #include <arch/cpu/ivt.h>
 
 volatile unsigned int counter = 0;
@@ -26,6 +27,11 @@ void increment_counter() {
 void start_kernel(){
 	set_ivt();
 	interrupt_setup();
+	init_timer(TIMER_INTERVAL);
+	pendings();
+	wait(1500000);
+	pendings();
+	
 
 	while(1){
 		char character = read_uart();

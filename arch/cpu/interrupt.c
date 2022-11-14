@@ -1,20 +1,22 @@
 #include <arch/cpu/interrupt.h>
 
 #define INTERRUPT_BASE (0x7E00B000 - 0x3F000000)
+#define BASIC_PENDING_OFFSET 0x200
 #define ENABLE_IRQ_1 0x210
 #define ENABLE_IRQ_2 0x214
 #define ENABLE_IRQ_BASIC 0x218
 
-void interrupt_setup(){
-    //struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
-    //unsigned int* enable_1 = (unsigned int*) INTERRUPT_BASE + ENABLE_IRQ_1;
-    //enable_1 = (unsigned int) 0x2000000F;
-    //unsigned int* enable_2 = (unsigned int*) INTERRUPT_BASE + ENABLE_IRQ_2;
-    //enable_2 = (unsigned int) 0x42FF6800;
+static volatile
+struct interrupt_enables* const enable = (struct interrupt_enables*) INTERRUPT_BASE + BASIC_PENDING_OFFSET;
 
-    struct interrupt_enables* const enable = (struct interrupt_enables*) INTERRUPT_BASE + ENABLE_IRQ_1;
+void interrupt_setup(){
     enable->en1 = (unsigned int) 0x2000000F;
     enable->en2 = (unsigned int) 0x42FF6800;
+    enable->base_enable |= 1;
+}
+
+void pendings(){
+    kprintf("%x\n", enable->basic_pending);
 }
 
 void reset(){
@@ -40,7 +42,6 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             reset();
             break;
         case EX_DABT:
-            kprintf("Data Abort\n");
             reg_dump(mode, regs);
             reset();
             break;
@@ -110,20 +111,24 @@ void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs * regs){
     switch (mode){
         case EX_DABT:
             kprintf("Data Abort an Adresse: 0x%08x\n", regs->pc);
-            kprintf("Data Fault Status Register: 0x%08x\n", regs->sr);
+            kprintf("Data Fault Status Register: 0x%08x", regs->sr);
+            data_fault_source(regs->sr);
             kprintf("Data Fault Adress Register: 0x%08x\n", regs->ar);
             break;
         case EX_UND:
-            //kprintf("Undefined Instruction an Adresse: 0x%08x\n", regs->pc);
+            kprintf("Undefined Instruction an Adresse: 0x%08x\n", regs->pc);
             break;
         case EX_PFABT:
-            //kprintf("Prefetch Abort an Adresse: 0x%08x\n", regs->pc);
+            kprintf("Prefetch Abort an Adresse: 0x%08x\n", regs->pc);
+            kprintf("Prefetch Fault Status Register: 0x%08x", regs->sr);
+            instruction_fault_source(regs->sr);
+            kprintf("Prefetch Fault Adress Register: 0x%08x\n", regs->ar);
             break;
         case EX_IRQ:
-            //kprintf("Interrupt an Adresse: 0x%08x\n", regs->pc);
+            kprintf("Interrupt an Adresse: 0x%08x\n", regs->pc);
             break;
         case EX_SVC:
-            //kprintf("Supervisor Call an Adresse: 0x%08x\n", regs->pc);
+            kprintf("Supervisor Call an Adresse: 0x%08x\n", regs->pc);
             break;
         
         default:
@@ -153,4 +158,108 @@ void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs * regs){
     mod_regs = (struct mode_regs*) get_mode_regs(PSR_SVC);
     kprintf("Supervisor  | LR: 0x%08x | SP: 0x%08x", mod_regs->lr, mod_regs->sp);
     spsr_info(mod_regs->spsr);
+}
+
+
+void data_fault_source(unsigned int status){
+    switch(read_masked(status, 4, 0)){
+        case 0x0:
+            kprintf(" -> No function, reset value\n");
+            break;
+        case 0x1:
+            kprintf(" -> Alignment fault\n");
+            break;
+        case 0x2:
+            kprintf(" -> Debug event fault\n");
+            break;
+        case 0x3:
+            kprintf(" -> Access Flag fault on Section\n");
+            break;
+        case 0x4:
+            kprintf(" -> Cache maintenance operation fault\n");
+            break;
+        case 0x5:
+            kprintf(" -> Translation fault on section\n");
+            break;
+        case 0x6:
+            kprintf(" -> Access Flag fault on Page\n");
+            break;
+        case 0x7:
+            kprintf(" -> Translation fault on Page\n");
+            break;
+        case 0x8:
+            kprintf(" -> Precise External Abort\n");
+            break;
+        case 0x9:
+            kprintf(" -> Domain fault on section\n");
+            break;
+        case 0xb:
+            kprintf(" -> Domain fault on Page\n");
+            break;
+        case 0xc:
+            kprintf(" -> External abort on Section\n");
+            break;
+        case 0xd:
+            kprintf(" -> Permission fault on Page\n");
+            break;
+        case 0xe:
+            kprintf(" -> External abort on Page\n");
+            break;
+        case 0xf:
+            kprintf(" -> Permission fault on Page\n");
+            break;
+        case 0x16:
+            kprintf(" -> Imprecise External Abort\n");
+            break;
+        default: 
+            kprintf(" -> No function\n");
+            break;
+    }
+}
+
+void instruction_fault_source(unsigned int status){
+    switch(read_masked(status, 4, 0)){
+        case 0x0:
+            kprintf(" -> No function, reset value\n");
+            break;
+        case 0x2:
+            kprintf(" -> Debug event fault\n");
+            break;
+        case 0x3:
+            kprintf(" -> Access Flag fault on Section\n");
+            break;
+        case 0x5:
+            kprintf(" -> Translation fault on section\n");
+            break;
+        case 0x6:
+            kprintf(" -> Access Flag fault on Page\n");
+            break;
+        case 0x7:
+            kprintf(" -> Translation fault on Page\n");
+            break;
+        case 0x8:
+            kprintf(" -> Precise External Abort\n");
+            break;
+        case 0x9:
+            kprintf(" -> Domain fault on section\n");
+            break;
+        case 0xb:
+            kprintf(" -> Domain fault on Page\n");
+            break;
+        case 0xc:
+            kprintf(" -> External abort on Section\n");
+            break;
+        case 0xd:
+            kprintf(" -> Permission fault on Section\n");
+            break;
+        case 0xe:
+            kprintf(" -> External abort on Page\n");
+            break;
+        case 0xf:
+            kprintf(" -> Permission fault on Page\n");
+            break;
+        default: 
+            kprintf(" -> No function\n");
+            break;
+    }
 }

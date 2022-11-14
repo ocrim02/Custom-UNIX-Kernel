@@ -1,0 +1,47 @@
+#include <arch/cpu/timer.h>
+#include <lib/utils.h>
+
+#define SYS_TIMER_BASE (0x7E003000 - 0x3F000000)
+
+struct sys_timer_regs{
+    unsigned int control;
+    unsigned int lower_bits;
+    unsigned int higher_bits;
+    unsigned int c0;
+    unsigned int c1;
+    unsigned int c2;
+    unsigned int c3;
+};
+
+static volatile
+struct sys_timer_regs* const regs = (struct sys_timer_regs *) SYS_TIMER_BASE;
+
+void init_timer(int interval){
+    regs->c0 = (unsigned int) interval;
+
+}
+
+unsigned int get_timer_value(){
+    return regs->lower_bits;
+}
+
+void reset_compare(unsigned int cmp){
+    regs->control |= 1 << cmp;
+}
+
+// do not unse for precise timings
+void wait(unsigned int duration){
+    duration = duration -59;    //correct for the time wait() takes
+    unsigned int start_time = regs->lower_bits;
+    unsigned int stop_time = (start_time + duration) % 0xFFFFFFFF;
+    
+    if(start_time < stop_time){
+        while(regs->lower_bits < stop_time){}
+    }
+    else{
+        unsigned int start_upper = regs->higher_bits;
+        while(start_upper == regs->higher_bits || regs->lower_bits < stop_time){}
+    }
+}
+
+
