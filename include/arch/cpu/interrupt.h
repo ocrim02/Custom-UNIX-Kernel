@@ -45,6 +45,14 @@ struct mode_regs{
     unsigned int spsr;
 };
 
+enum INTERRUPT_SOURCE{
+    SYS_TIMER_1 = 0,
+    SYS_TIMER_2 = 1,
+    SYS_TIMER_3 = 2,
+    SYS_TIMER_4 = 3,
+    UART = 57
+};
+
 enum EXCEPTION_MODE{
 	EX_UND   = 1, // Undefined Instruction
 	EX_SVC   = 2, // Supervisor Call
@@ -53,6 +61,8 @@ enum EXCEPTION_MODE{
 	EX_IRQ   = 5  // Interrupt
 };
 
+unsigned int get_irq_regdump();
+void switch_irq_regdump();
 void data_fault_source(unsigned int);
 void instruction_fault_source(unsigned int);
 void interrupt_setup();
@@ -61,5 +71,6 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void spsr_info(unsigned int);
 void pendings();
+unsigned int get_irq_source();
 
 #endif

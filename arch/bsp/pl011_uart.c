@@ -14,14 +14,48 @@ struct uart_regs{
     unsigned int icr;
 };
 
+struct uart_ring_buffer{
+    unsigned int head;
+    unsigned int tail;
+    bool full;
+    char buffer[UART_INPUT_BUFFER_SIZE];
+};
+
 static volatile
 struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
 
+static volatile
+struct uart_ring_buffer buff;
+
+void init_ring_buffer(){
+    buff.head = 0;
+    buff.tail = 0;
+    buff.full = false;
+}
+
+void put_ring_buffer(char character){
+    if(!buff.full){
+        buff.buffer[buff.head] = character;
+        buff.head = (buff.head + 1)%UART_INPUT_BUFFER_SIZE;
+        if(buff.head == buff.tail){
+            buff.full = true;
+        }
+    }
+}
+
+char pop_ring_buffer(){
+    if(buff.tail == buff.head && !buff.full){
+        return 0;
+    }
+    char pop = buff.buffer[buff.tail];
+    buff.tail = (buff.tail + 1)%UART_INPUT_BUFFER_SIZE;
+    buff.full = false;
+    return pop;
+}
 
 void setup_int_uart(){
-    
     regs->imsc = 1 << 4;
-    regs->imsc |= 1 << 5;
+    init_ring_buffer();
     kprintf("mask: %x\n", regs->imsc);
 }
 

@@ -16,8 +16,23 @@ struct interrupt_enables{
     unsigned int base_enable;
 };
 
+volatile unsigned int irq_regdump = 0;
+
 static volatile
 struct interrupt_enables* const enable = (struct interrupt_enables*) (INTERRUPT_BASE + BASIC_PENDING_OFFSET);
+
+unsigned int get_irq_regdump(){
+    return irq_regdump;
+}
+
+void switch_irq_regdump(){
+    if(irq_regdump){
+		irq_regdump = 0;
+	}
+	else{
+		irq_regdump = 1;
+	}
+}
 
 void interrupt_setup(){
     enable->en1 = 1 << 1;
@@ -29,6 +44,17 @@ void pendings(){
     kprintf("Basic: %x\n", enable->basic_pending);
     kprintf("IRQ_1 %x\n", enable->irq_pending_1);
     kprintf("IRQ_2 %x\n", enable->irq_pending_2);
+}
+
+unsigned int get_irq_source(){
+    unsigned int position = __builtin_ctz(enable->irq_pending_1);
+    if(position == 32){
+        return position + __builtin_ctz(enable->irq_pending_2);
+    }
+    else{
+        return position;
+    }
+    
 }
 
 void reset(){
@@ -58,15 +84,24 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             reset();
             break;
         case EX_IRQ:
-            //ack
-            ack_timer_interrupt(1);
+            switch(get_irq_source()){
+                case SYS_TIMER_2:
+                    ack_timer_interrupt(1);
+                    increment_compare(TIMER_INTERVAL);
+                    break;
+                case UART:
+                    put_ring_buffer(read_uart());
+                    break;
 
-            kprintf("Interrupt\n");
-            reg_dump(mode, regs);
-            increment_compare(TIMER_INTERVAL);
+            }
+
+            if(irq_regdump){
+                reg_dump(mode, regs);
+            }
             //enable interrupt
             enable_interrupts();
             break;
+
         default:
             kprintf("Undefined Exception\n");
             break;

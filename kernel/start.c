@@ -19,6 +19,7 @@
 
 volatile unsigned int counter = 0;
 
+
 void increment_counter() {
 	counter++;
 }
@@ -27,21 +28,18 @@ void increment_counter() {
 void start_kernel(){
 	set_ivt();
 	interrupt_setup();
-
-	//setup_int_uart();
 	increment_compare(TIMER_INTERVAL);
-	//enable_interrupts();	//brauche ich nicht
+	setup_int_uart();
 	
-	kprintf("Interrupt_enable (sollte 0 sein): %x\n", read_masked(get_processor_mode(), 7, 7));
-	//wait(2000000);
-	//get_timer_value();
 	//pendings();
 	
 
 	while(1){
-		char character = read_uart();
-
-		kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
+		//char character = read_uart();
+		char character = pop_ring_buffer();
+		if(character != 0){
+			kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
+		}
 		volatile unsigned int* test = (unsigned int*) 0x1; 
 		volatile unsigned int d;
 		switch(character){
@@ -61,7 +59,10 @@ void start_kernel(){
 				//undefined instruction
 				create_undefined_instruction();
 				break;
-	}
+			case 'd':
+				switch_irq_regdump();
+				break;
+		}
 
 	}
 	
