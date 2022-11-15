@@ -6,17 +6,29 @@
 #define ENABLE_IRQ_2 0x214
 #define ENABLE_IRQ_BASIC 0x218
 
+struct interrupt_enables{
+    unsigned int basic_pending;
+    unsigned int irq_pending_1;
+    unsigned int irq_pending_2;
+    unsigned int unused;
+    unsigned int en1;
+    unsigned int en2;
+    unsigned int base_enable;
+};
+
 static volatile
-struct interrupt_enables* const enable = (struct interrupt_enables*) INTERRUPT_BASE + BASIC_PENDING_OFFSET;
+struct interrupt_enables* const enable = (struct interrupt_enables*) (INTERRUPT_BASE + BASIC_PENDING_OFFSET);
 
 void interrupt_setup(){
-    enable->en1 = (unsigned int) 0x2000000F;
-    enable->en2 = (unsigned int) 0x42FF6800;
-    enable->base_enable |= 1;
+    enable->en1 = 1 << 1;
+    enable->en2 = 1 << 25;
+    enable->base_enable = 1<<0;
 }
 
 void pendings(){
-    kprintf("%x\n", enable->basic_pending);
+    kprintf("Basic: %x\n", enable->basic_pending);
+    kprintf("IRQ_1 %x\n", enable->irq_pending_1);
+    kprintf("IRQ_2 %x\n", enable->irq_pending_2);
 }
 
 void reset(){
@@ -46,8 +58,14 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             reset();
             break;
         case EX_IRQ:
+            //ack
+            ack_timer_interrupt(1);
+
             kprintf("Interrupt\n");
             reg_dump(mode, regs);
+            increment_compare(TIMER_INTERVAL);
+            //enable interrupt
+            enable_interrupts();
             break;
         default:
             kprintf("Undefined Exception\n");

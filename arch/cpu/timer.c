@@ -16,16 +16,19 @@ struct sys_timer_regs{
 static volatile
 struct sys_timer_regs* const regs = (struct sys_timer_regs *) SYS_TIMER_BASE;
 
-void init_timer(int interval){
-    regs->c0 = (unsigned int) interval;
+void increment_compare(int interval){
+    regs->c1 = (regs->c1 + (unsigned int) interval) % 0xFFFFFFFF;
+}
 
+void get_pendings_timer(){
+    kprintf("pending timer: %x\n", regs->control);
 }
 
 unsigned int get_timer_value(){
     return regs->lower_bits;
 }
 
-void reset_compare(unsigned int cmp){
+void ack_timer_interrupt(unsigned int cmp){
     regs->control |= 1 << cmp;
 }
 

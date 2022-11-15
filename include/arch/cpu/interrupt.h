@@ -2,7 +2,10 @@
 #define INTERRUPT_H
 
 #include <lib/utils.h>
+#include <config.h>
 #include <arch/bsp/yellow_led.h>
+#include <arch/cpu/timer.h>
+#include <arch/cpu/ivt.h>
 
 
 #define PSR_USR (0x10)
@@ -14,10 +17,9 @@
 #define PSR_SYS (0x1f)
 
 struct dump_regs{
-    unsigned int sp;
     unsigned int lr;
+    unsigned int sp;
     unsigned int spsr;
-    unsigned int pc;
     unsigned int sr;
     unsigned int ar;
     unsigned int r0;
@@ -33,20 +35,14 @@ struct dump_regs{
     unsigned int r10;
     unsigned int r11;
     unsigned int r12; 
+    unsigned int pc;
+    
 };
 
 struct mode_regs{
     unsigned int lr;
     unsigned int sp;
     unsigned int spsr;
-};
-
-struct interrupt_enables{
-    unsigned int basic_pending;
-    unsigned int unused[3];
-    unsigned int en1;
-    unsigned int en2;
-    unsigned int base_enable;
 };
 
 enum EXCEPTION_MODE{

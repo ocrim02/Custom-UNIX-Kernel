@@ -7,12 +7,27 @@ struct uart_regs{
     unsigned int data;
     unsigned int unused0[5];
     unsigned int fr;
-    unsigned int unused1[8];
+    unsigned int unused1[7];
+    unsigned int imsc;
     unsigned int ris;
+    unsigned int mis;
+    unsigned int icr;
 };
 
 static volatile
 struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
+
+
+void setup_int_uart(){
+    
+    regs->imsc = 1 << 4;
+    regs->imsc |= 1 << 5;
+    kprintf("mask: %x\n", regs->imsc);
+}
+
+void get_pendings_uart(){
+    kprintf("pending Uart: %x\n", regs->mis);
+}
 
 /*
  * read a single char from uart 
