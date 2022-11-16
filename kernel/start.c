@@ -24,6 +24,18 @@ void increment_counter() {
 	counter++;
 }
 
+void charcter_loop(){
+	while(1){
+		char character = pop_ring_buffer();
+		if(character != 0){
+			for(int i=0; i<40; i++){
+				kprintf("%c", character);
+				busy_wait(30000);
+			}
+		}
+	}
+}
+
 
 void start_kernel(){
 	set_ivt();
@@ -40,8 +52,6 @@ void start_kernel(){
 		if(character != 0){
 			kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
 		}
-		volatile unsigned int* test = (unsigned int*) 0x1; 
-		volatile unsigned int d;
 		switch(character){
 			case 'p':
 				//prefetch abort
@@ -62,10 +72,13 @@ void start_kernel(){
 			case 'd':
 				switch_irq_regdump();
 				break;
+			case 'e':
+				switch_loop_mode();
+				charcter_loop();
+				break;
 		}
 
 	}
-	
 
 	// Endless counter
 	for (;;) {
@@ -73,3 +86,5 @@ void start_kernel(){
 	}
 
 }
+
+

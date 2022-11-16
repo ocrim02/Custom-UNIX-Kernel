@@ -3,6 +3,7 @@
 
 #include <arch/cpu/interrupt.h>
 #include <lib/utils.h>
+#include <arch/bsp/pl011_uart.h>
 
 void create_prefetch_abort();
 void create_supervisor_call();
@@ -11,7 +12,6 @@ void create_data_abort();
 struct mode_regs* get_mode_regs(unsigned int);
 void set_ivt();
 unsigned int get_processor_mode();
-void enable_interrupts();
 unsigned int mem_test(unsigned int, unsigned int, unsigned int, unsigned int);
 
 #endif

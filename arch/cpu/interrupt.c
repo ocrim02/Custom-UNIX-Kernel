@@ -17,6 +17,7 @@ struct interrupt_enables{
 };
 
 volatile unsigned int irq_regdump = 0;
+volatile unsigned int character_loop_mode = 0;
 
 static volatile
 struct interrupt_enables* const enable = (struct interrupt_enables*) (INTERRUPT_BASE + BASIC_PENDING_OFFSET);
@@ -31,6 +32,15 @@ void switch_irq_regdump(){
 	}
 	else{
 		irq_regdump = 1;
+	}
+}
+
+void switch_loop_mode(){
+    if(character_loop_mode){
+		character_loop_mode = 0;
+	}
+	else{
+		character_loop_mode = 1;
 	}
 }
 
@@ -84,22 +94,23 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             reset();
             break;
         case EX_IRQ:
+            if(irq_regdump){
+                reg_dump(mode, regs);
+            }
             switch(get_irq_source()){
                 case SYS_TIMER_2:
-                    ack_timer_interrupt(1);
+                    if(character_loop_mode == 1){
+                        kprintf("!\n");
+
+                    }
                     increment_compare(TIMER_INTERVAL);
+                    ack_timer_interrupt(1);
                     break;
                 case UART:
                     put_ring_buffer(read_uart());
                     break;
 
             }
-
-            if(irq_regdump){
-                reg_dump(mode, regs);
-            }
-            //enable interrupt
-            enable_interrupts();
             break;
 
         default:

@@ -33,7 +33,7 @@ void ack_timer_interrupt(unsigned int cmp){
 }
 
 // do not unse for precise timings
-void wait(unsigned int duration){
+void busy_wait(unsigned int duration){
     duration = duration -59;    //correct for the time wait() takes
     unsigned int start_time = regs->lower_bits;
     unsigned int stop_time = (start_time + duration) % 0xFFFFFFFF;

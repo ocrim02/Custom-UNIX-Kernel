@@ -56,7 +56,6 @@ char pop_ring_buffer(){
 void setup_int_uart(){
     regs->imsc = 1 << 4;
     init_ring_buffer();
-    kprintf("mask: %x\n", regs->imsc);
 }
 
 void get_pendings_uart(){

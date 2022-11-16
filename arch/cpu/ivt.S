@@ -42,27 +42,28 @@ set_ivt:
     mov pc, lr
 
 //Source: VALVERS.COM/open-software/raspberry-pi/bare-metal-programming-in-c-part-4/
-.global enable_interrupts
+/* .global enable_interrupts
 enable_interrupts:
 	mrs r0, cpsr
     bic r0, r0 , #0x80
     msr cpsr_c, r0
     cpsie i
 
-    mov pc, lr
+    mov pc, lr*/
 
 .global get_mode_regs
 get_mode_regs:
     stmfd sp!, {lr}
-    mov r1, r0
+    add r9, r0, #0xc0
 	bl get_processor_mode
+    mov r10, r0
     ldmfd sp!, {lr}
 
-    msr cpsr_cxsf, r1
+    msr cpsr_c, r9
     mov r2, lr
     mov r3, sp
     mrs r4, spsr
-    msr cpsr_cxsf, r0
+    msr cpsr_c, r10
     stmfd sp!, {r2-r4}
 
     mov r0, sp
@@ -152,6 +153,23 @@ _data_abort:
     ldmfd sp!, {r0-r12, pc}^
 
 _not_used:
+    //set lr pipeline offset
+    sub lr, lr, #4
+    stmfd sp!, {r0-r12, lr}
+    mrs r0, sp_usr
+    mrs r1, lr_usr
+    mrs r2, spsr
+    mov r3, #0
+    mov r4, #0
+    stmfd sp!, {r0-r4}
+
+    mov r0, #7
+    mov r1, sp
+    bl  interrupt
+
+    //go back 
+    ldmfd sp!, {r0-r4}
+    ldmfd sp!, {r0-r12, pc}^
 
 
 _irq:
@@ -161,7 +179,7 @@ _irq:
     mrs r0, sp_usr
     mrs r1, lr_usr
     mrs r2, spsr
-    mov r3, #0
+    mrs r3, cpsr
     mov r4, #0
     stmfd sp!, {r0-r4}
 
@@ -174,6 +192,23 @@ _irq:
     ldmfd sp!, {r0-r12, pc}^
 
 
-
 _fiq:
+    //set lr pipeline offset
+    sub lr, lr, #4
+    stmfd sp!, {r0-r12, lr}
+    mrs r0, sp_usr
+    mrs r1, lr_usr
+    mrs r2, spsr
+    mov r3, #0
+    mov r4, #0
+    stmfd sp!, {r0-r4}
+
+    mov r0, #6
+    mov r1, sp
+    bl  interrupt
+
+    //go back 
+    ldmfd sp!, {r0-r4}
+    ldmfd sp!, {r0-r12, pc}^
+
     
