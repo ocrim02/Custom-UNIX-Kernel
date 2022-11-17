@@ -30,7 +30,7 @@ struct systim_regs* const regs = (struct systim_regs *) SYSTTIMER_BASE;
 
 
 //setzt den timer c0
-void init_systimer_c0(unsigned int timer)
+void init_systimer_c0(unsigned int timer) 
 {
     regs->c0 = timer;
     return;
@@ -49,6 +49,7 @@ void timer_irq_solver(void)
         	regs->cs |= (1<<0);
         
         	//timerwert erhöhen für neuen interrupt 
+        	//vorrausgesetzt t_regs->c0 wurde nicht zurückgesetzt
         	regs->c0 += regs->c0;
         }
         /* erst wenn erstes geht
@@ -74,5 +75,6 @@ void timer_irq_solver(void)
         	regs->c3 += regs->c3;
         }
         */
+        //mit true wert wenn einer gefunden wurde in der if abrage ?
         return;
 }
