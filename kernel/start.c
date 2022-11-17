@@ -13,6 +13,7 @@
 
 #include <arch/bsp/pl011_uart.h>
 #include <config.h>
+#include <lib/ringbuffer.h>
 
 volatile unsigned int counter = 0;
 
@@ -24,8 +25,8 @@ void increment_counter() {
 
 void start_kernel(){
 
-	test_kprintf();
-	read_uart();
+	//test_kprintf();
+	//read_uart();
 
 	// Endless counter
 	for (;;) {
