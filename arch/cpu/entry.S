@@ -1,4 +1,3 @@
-
 .section .init
 
 .global _start
@@ -36,9 +35,34 @@ _enableAlignCheck:
 
 _bsprak:
 	/* Validen Stack Pointer setzten */
+	
+	//cps #0x10
 	ldr sp,=0x100000
+	//cpsie i
+
+	cps #0x12
+	ldr sp, =#134201344
+	//cpsie i
+
+	cps #0x17
+	ldr sp, =#134205440
+	//cpsie i
+
+	cps #0x1B
+	ldr sp, =#134209536
+	//cpsie i
+
+	cps #0x1F
+	ldr sp, =#134213632
+	//cpsie i
+
+	cps #0x13
+	ldr sp, =#134217728
+	cpsie i
+
 	/* Zu c Code springen */
 	bl  start_kernel
+
 .Lend:
 	WFI
 	b .Lend
@@ -68,5 +92,6 @@ _exitHyper:
 	orr r0, r0, #0x13	//Supervisormode
 	msr spsr_hyp, r0
 	eret
+	
 
 #undef __ASSEMBLY__
