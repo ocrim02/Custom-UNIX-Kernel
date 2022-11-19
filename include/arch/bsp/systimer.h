@@ -5,8 +5,8 @@
 #include <config.h>
 #include <lib/utils.h>
 
-//setzt den timer c0
-void init_systimer_c0(unsigned int timer);
+//setzt den timer c1
+void init_systimer_c1(unsigned int timer);
 
 //init c 1 2 3 machen wenn 0 geht 
 

@@ -27,12 +27,12 @@ struct systim_regs* const regs = (struct systim_regs *) SYSTTIMER_BASE;
 //interupt controller configurieren VL2 S.26
 //zum aufteilen der interrupt lines
 
+//c0 und 2 sind für gpu reserviert es sollen nur c1 und 3 verwendet werden
 
-
-//setzt den timer c0
-void init_systimer_c0(unsigned int timer) 
+//setzt den timer c1
+void init_systimer_c1(unsigned int timer) 
 {
-    regs->c0 = timer;
+    regs->c1 = timer;
     return;
 }
 //init c 1 2 3 machen wenn 0 geht 
