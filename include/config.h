@@ -17,12 +17,27 @@
  */
 
 /* Include-Pfad bitte gegenfalls anpassen */
+
+#include <arch/bsp/yellow_led.h>
+#include <arch/bsp/systimer.h>
+#include <arch/bsp/pl011_uart.h>
+
+#include <arch/cpu/ivt.h>
+#include <arch/cpu/interrupt_handler.h>
+#include <arch/cpu/interrupt_controller.h>
+
 #include <lib/utils.h> 
+
+
+#include <stdarg.h>
+#include <stdbool.h>
+
 static inline void test_kprintf(void) {
 	/* Nur für Aufgabenblatt 1
 	 * Hier Test Funktion für kprintf schreiben und
 	 * nach dem vollständigen initialisieren aufrufen
 	 */
+	/*
 	kprintf("kprintf_test\n\n");
 
 	int i = 65;
@@ -343,6 +358,7 @@ static inline void test_kprintf(void) {
     kprintf("Teste Befehl %%06 unf %%7:\n\n");
 	kprintf("ist : &&%06u&&\n\n",(unsigned int) 5633821);
 	kprintf("ist : &&%7u&&\n\n",(unsigned int) 5633851);
+	*/
 }
 
 /**

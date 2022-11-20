@@ -32,6 +32,7 @@ struct systim_regs* const regs = (struct systim_regs *) SYSTTIMER_BASE;
 //setzt den timer c1
 void init_systimer_c1(unsigned int timer) 
 {
+    regs->cs |= (1<<1);
     regs->c1 = timer;
     return;
 }
@@ -39,42 +40,44 @@ void init_systimer_c1(unsigned int timer)
 
 //findet heraus welcher timer den interrupt erzeugt hat
 //soll aufgerufen werden vom interrupt service bzw controller 
-void timer_irq_solver(void)
+void timer_irq_solver(int timer)
 {       
         unsigned int status = regs->cs;
 		
 		//check welcher timer ausgelößt dann gehen
-        if(status & (1<<0)){
+        if(timer == 0){
             //schreibt bit (m0) zum timer interrupt clear
         	regs->cs |= (1<<0);
         
         	//timerwert erhöhen für neuen interrupt 
-        	//vorrausgesetzt t_regs->c0 wurde nicht zurückgesetzt
         	regs->c0 += regs->c0;
         }
-        /* erst wenn erstes geht
-        else if(status & (1<<1)){
-            //schreibt bit (m0) zum timer interrupt clear
+        else if(timer == 1){
+            //schreibt bit (m1) zum timer interrupt clear
         	regs->cs |= (1<<1);
         
         	//timerwert erhöhen für neuen interrupt 
+        	//vorrausgesetzt t_regs->c0 wurde nicht zurückgesetzt
         	regs->c1 += regs->c1;
         }
-        else if(status & (1<<2)){
-            //schreibt bit (m0) zum timer interrupt clear
+        else if(timer == 2){
+            //schreibt bit (m2) zum timer interrupt clear
         	regs->cs |= (1<<2);
         
         	//timerwert erhöhen für neuen interrupt 
         	regs->c2 += regs->c2;
         }
         else if(status & (1<<3)){
-            //schreibt bit (m0) zum timer interrupt clear
+            //schreibt bit (m3) zum timer interrupt clear
         	regs->cs |= (1<<3);
         
         	//timerwert erhöhen für neuen interrupt 
         	regs->c3 += regs->c3;
         }
-        */
+        //check welcher timer ausgelößt wurde 
+        //status & (1<<timer)
+        
         //mit true wert wenn einer gefunden wurde in der if abrage ?
+        //true wenn rest von allem ok ist ? also status bits (c0,c1,c2,c3) sonst 0 ?
         return;
 }

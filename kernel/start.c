@@ -11,11 +11,15 @@
 /// Es bietet sich jedoch an manche Funktionalitäten in andere
 /// Dateien aus zu lagern.
 
-#include <arch/bsp/pl011_uart.h>
 #include <config.h>
+
+/*
+#include <arch/bsp/pl011_uart.h>
 #include <lib/ringbuffer.h>
-#include <arch/cpu/interrupt.h>
 #include <arch/cpu/ivt.h>
+#include <arch/cpu/interrupt_handler.h>
+#include <arch/cpu/interrupt_controller.h>
+*/
 
 volatile unsigned int counter = 0;
 
@@ -28,10 +32,16 @@ void increment_counter() {
 void start_kernel(){
 
 	set_ivt();
-	interrupt_setup();
 
-	//test_kprintf();
+	enable_basic_interrupts_disable_rest();
+	init_systimer_c1(TIMER_INTERVAL);
+
 	//read_uart();
+	//pendings();
+	
+	while (0) {
+		kprintf("%x\n", interrupt_pos());
+	}
 
 	// Endless counter
 	for (;;) {

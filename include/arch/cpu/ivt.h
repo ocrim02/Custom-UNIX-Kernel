@@ -1,9 +1,12 @@
 #ifndef _IVT_H_
 #define _IVT_H_
 
-#include <arch/cpu/interrupt.h>
+#include <config.h>
+/*
+#include <arch/cpu/interrupt_handler.h>
 #include <lib/utils.h>
 #include <arch/bsp/pl011_uart.h>
+*/
 
 void create_prefetch_abort();
 void create_supervisor_call();

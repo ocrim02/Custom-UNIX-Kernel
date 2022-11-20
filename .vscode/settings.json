@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "interrupt_handler.h": "c",
+        "interrupt_controller.h": "c",
+        "pl011_uart.h": "c",
+        "ringbuffer.h": "c"
+    }
+}

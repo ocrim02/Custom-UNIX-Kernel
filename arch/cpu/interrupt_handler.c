@@ -1,32 +1,9 @@
-#include <arch/cpu/interrupt.h>
+#include <arch/cpu/interrupt_handler.h>
 
-#define INTERRUPT_BASE (0x7E00B000 - 0x3F000000)
-#define BASIC_PENDING_OFFSET 0x200
-#define ENABLE_IRQ_1 0x210
-#define ENABLE_IRQ_2 0x214
-#define ENABLE_IRQ_BASIC 0x218
 
-struct interrupt_enables{
-    unsigned int basic_pending;
-    unsigned int irq_pending_1;
-    unsigned int irq_pending_2;
-    unsigned int unused;
-    unsigned int en1;
-    unsigned int en2;
-    unsigned int base_enable;
-};
+unsigned int irq_regdump = 0;
 
-volatile unsigned int irq_regdump = 0;
-volatile unsigned int character_loop_mode = 0;
 
-static volatile
-struct interrupt_enables* const enable = (struct interrupt_enables*) (INTERRUPT_BASE + BASIC_PENDING_OFFSET);
-/*
-unsigned int get_irq_regdump(){
-    return irq_regdump;
-}
-*/
-/*
 void switch_irq_regdump(){
     if(irq_regdump){
 		irq_regdump = 0;
@@ -35,7 +12,7 @@ void switch_irq_regdump(){
 		irq_regdump = 1;
 	}
 }
-*/
+
 /*
 void switch_loop_mode(){
     if(character_loop_mode){
@@ -46,18 +23,9 @@ void switch_loop_mode(){
 	}
 }
 */
-void interrupt_setup(){
-    enable->en1 = 1 << 1;
-    enable->en2 = 1 << 25;
-    enable->base_enable = 1<<0;
-}
 
-void pendings(){
-    kprintf("Basic: %x\n", enable->basic_pending);
-    kprintf("IRQ_1 %x\n", enable->irq_pending_1);
-    kprintf("IRQ_2 %x\n", enable->irq_pending_2);
-}
 
+/*
 unsigned int get_irq_source(){
     unsigned int position = __builtin_ctz(enable->irq_pending_1);
     if(position == 32){
@@ -68,6 +36,7 @@ unsigned int get_irq_source(){
     }
     
 }
+*/
 
 void reset(){
     kprintf("reset\n");
@@ -96,11 +65,18 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             reset();
             break;
         case EX_IRQ:
+            kprintf("EX_IRQ!\n");
+
             if(irq_regdump){
                 reg_dump(mode, regs);
             }
-            /*
-            switch(get_irq_source()){
+            
+            switch(interrupt_pos()){
+                case EN_SYSTIMER_C1_EN1: //was senden denn behandlung
+                    kprintf("Timer!\n");
+                    timer_irq_solver(1);
+                    break;
+                /*
                 case SYS_TIMER_2:
                     if(character_loop_mode == 1){
                         kprintf("!\n");
@@ -109,12 +85,12 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                     increment_compare(TIMER_INTERVAL);
                     ack_timer_interrupt(1);
                     break;
+                    
                 case UART:
                     put_ring_buffer(read_uart());
                     break;
-
+                */
             }
-            */
             break;
             
 

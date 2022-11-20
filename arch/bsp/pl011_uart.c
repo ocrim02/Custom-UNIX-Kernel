@@ -46,6 +46,33 @@ void read_uart(void)
             if(character != 0x0){
                 kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
             }
+            switch(character){
+			case 'p':
+				//prefetch abort
+				create_prefetch_abort();
+				break;
+			case 's':
+				//supervisor call
+				create_supervisor_call();
+				break;
+			case 'a':
+				//data abort
+				create_data_abort();
+				break;
+			case 'u':
+				//undefined instruction
+				create_undefined_instruction();
+				break;
+			case 'd':
+				switch_irq_regdump();
+				break;
+            /*
+			case 'e':
+				switch_loop_mode();
+				charcter_loop();
+				break;
+				*/
+			}
         }
     }
     

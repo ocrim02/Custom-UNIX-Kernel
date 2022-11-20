@@ -1,9 +1,11 @@
 #ifndef UTILS_H
-#include <arch/bsp/pl011_uart.h>
+//#include <arch/bsp/pl011_uart.h>
 #define UTILS_H
 
+#include <config.h>
 #include <stdarg.h>
 #include <stdbool.h>
+
 
 
 void kprintf(char*, ...);
