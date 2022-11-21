@@ -65,23 +65,40 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             reset();
             break;
         case EX_IRQ:
-            kprintf("EX_IRQ!\n");
-
+            
             if(irq_regdump){
                 reg_dump(mode, regs);
             }
             
-            switch(interrupt_pos()){
-                case EN_SYSTIMER_C1_EN1: //was senden denn behandlung
-                    kprintf("Timer!\n");
-                    timer_irq_solver(1);
+            switch(irq_basis_pos()){
+                //casefür ARM timer?
+
+                case BIT_IN_PEND1: //was senden denn behandlung
+                    switch(irq_pend1_pos()){
+                        case EN_SYSTIMER_C1_EN1: //was senden denn behandlung
+                            kprintf("!\n");
+                            //kprintf("!\n");
+                            /*
+                            if(character_loop_mode == 1){
+                                kprintf("!\n");
+                            }*/
+                            timer_irq_solver(1, TIMER_INTERVAL);
+                            break;
+                    }
                     break;
-                /*
-                case SYS_TIMER_2:
-                    if(character_loop_mode == 1){
-                        kprintf("!\n");
+
+                case BIT_IN_PEND2: //was senden denn behandlung
+                    switch(irq_pend1_pos()){
+                        case EN_SYSTIMER_UART_EN2: //was senden denn behandlung
+                            break;
 
                     }
+                    break;
+                
+                
+                /*
+                case SYS_TIMER_2:
+                    
                     increment_compare(TIMER_INTERVAL);
                     ack_timer_interrupt(1);
                     break;

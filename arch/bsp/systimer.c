@@ -28,19 +28,34 @@ struct systim_regs* const regs = (struct systim_regs *) SYSTTIMER_BASE;
 //zum aufteilen der interrupt lines
 
 //c0 und 2 sind für gpu reserviert es sollen nur c1 und 3 verwendet werden
-
-//setzt den timer c1
-void init_systimer_c1(unsigned int timer) 
+void init_systimer(int timer, unsigned int time)
 {
-    regs->c1 = timer;
-    kprintf("Timer is set (probably)\n");
+    //regs->c1 = time;
+    
+    if(timer == 0){
+        regs->c0 = time;
+    }
+    else if(timer == 1){
+        regs->c1 = time;
+    }
+    else if(timer == 2){
+        regs->c2 = time;
+    }
+    else if(timer == 3){
+        regs->c3 = time;
+    }
+    else {
+        kprintf("Undefined Timer: there are only 0 to 3\n");
+    }
+    
+
     return;
 }
 //init c 1 2 3 machen wenn 0 geht 
 
 //findet heraus welcher timer den interrupt erzeugt hat
 //soll aufgerufen werden vom interrupt service bzw controller 
-void timer_irq_solver(int timer)
+void timer_irq_solver(int timer, int time)
 {       
         unsigned int status = regs->cs;
 		
@@ -50,7 +65,7 @@ void timer_irq_solver(int timer)
         	regs->cs |= (1<<0);
         
         	//timerwert erhöhen für neuen interrupt 
-        	regs->c0 += regs->c0;
+        	regs->c0 = (regs->c0 + time) % ONES_32BIT;
         }
         else if(timer == 1){
             //schreibt bit (m1) zum timer interrupt clear
@@ -58,30 +73,21 @@ void timer_irq_solver(int timer)
         
         	//timerwert erhöhen für neuen interrupt 
         	//vorrausgesetzt t_regs->c0 wurde nicht zurückgesetzt
-        	regs->c1 += regs->c1;
+        	regs->c1 = (regs->c1 + time) % ONES_32BIT;
         }
         else if(timer == 2){
             //schreibt bit (m2) zum timer interrupt clear
         	regs->cs |= (1<<2);
         
         	//timerwert erhöhen für neuen interrupt 
-        	regs->c2 += regs->c2;
+        	regs->c2 = (regs->c2 + time) % ONES_32BIT;
         }
         else if(status & (1<<3)){
             //schreibt bit (m3) zum timer interrupt clear
         	regs->cs |= (1<<3);
         
         	//timerwert erhöhen für neuen interrupt 
-        	regs->c3 += regs->c3;
+        	regs->c3 = (regs->c3 + time) % ONES_32BIT;
         }
-        //check welcher timer ausgelößt wurde 
-        //status & (1<<timer)
-        
-        //mit true wert wenn einer gefunden wurde in der if abrage ?
-        //true wenn rest von allem ok ist ? also status bits (c0,c1,c2,c3) sonst 0 ?
         return;
-}
-
-unsigned int timer_status(void) {
-	return (unsigned int) regs->cs;
 }

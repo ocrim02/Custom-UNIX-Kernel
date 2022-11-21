@@ -33,23 +33,10 @@ void start_kernel(){
 
 	set_ivt();
 
-	enable_basic_interrupts_disable_rest();
-	init_systimer_c1(TIMER_INTERVAL);
-
-	//read_uart();
-	//pendings();
+	enable_irq(EN_ARM_TIMER_BASIC, EN_SYSTIMER_C1_EN1, EN_SYSTIMER_UART_EN2);
+	init_systimer(1, TIMER_INTERVAL);
 	
-	while (1) {
-		
-		if(timer_status() > 0){
-			kprintf("TIMER!\n");
-			timer_irq_solver(1);
-			kprintf("%x\n", pending_status());
-		}
-		//check controller pendings
-		
-		
-	}
+	//read_uart();
 
 	// Endless counter
 	for (;;) {
