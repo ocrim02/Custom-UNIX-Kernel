@@ -2,6 +2,7 @@
 
 
 unsigned int irq_regdump = 0;
+unsigned int character_loop_mode = 0;
 
 
 void switch_irq_regdump(){
@@ -13,7 +14,7 @@ void switch_irq_regdump(){
 	}
 }
 
-/*
+
 void switch_loop_mode(){
     if(character_loop_mode){
 		character_loop_mode = 0;
@@ -22,21 +23,7 @@ void switch_loop_mode(){
 		character_loop_mode = 1;
 	}
 }
-*/
 
-
-/*
-unsigned int get_irq_source(){
-    unsigned int position = __builtin_ctz(enable->irq_pending_1);
-    if(position == 32){
-        return position + __builtin_ctz(enable->irq_pending_2);
-    }
-    else{
-        return position;
-    }
-    
-}
-*/
 
 void reset(){
     kprintf("reset\n");
@@ -76,12 +63,9 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                 case BIT_IN_PEND1: //was senden denn behandlung
                     switch(irq_pend1_pos()){
                         case EN_SYSTIMER_C1_EN1: //was senden denn behandlung
-                            kprintf("!\n");
-                            //kprintf("!\n");
-                            /*
                             if(character_loop_mode == 1){
                                 kprintf("!\n");
-                            }*/
+                            }
                             timer_irq_solver(1, TIMER_INTERVAL);
                             break;
                     }
@@ -90,6 +74,7 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                 case BIT_IN_PEND2: //was senden denn behandlung
                     switch(irq_pend1_pos()){
                         case EN_SYSTIMER_UART_EN2: //was senden denn behandlung
+                            //ring puffer betrieb
                             break;
 
                     }

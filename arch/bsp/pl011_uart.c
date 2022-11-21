@@ -66,12 +66,12 @@ void read_uart(void)
 			case 'd':
 				switch_irq_regdump();
 				break;
-            /*
 			case 'e':
 				switch_loop_mode();
-				charcter_loop();
+				//charcter_loop();
+                
+                //init ringbuffer
 				break;
-				*/
 			}
         }
     }
