@@ -39,8 +39,16 @@ void start_kernel(){
 	//read_uart();
 	//pendings();
 	
-	while (0) {
-		kprintf("%x\n", interrupt_pos());
+	while (1) {
+		
+		if(timer_status() > 0){
+			kprintf("TIMER!\n");
+			timer_irq_solver(1);
+			kprintf("%x\n", pending_status());
+		}
+		//check controller pendings
+		
+		
 	}
 
 	// Endless counter

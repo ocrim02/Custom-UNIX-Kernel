@@ -22,9 +22,9 @@ void enable_basic_interrupts_disable_rest(void) {
 	unsigned int select_all = 0xFFFFFFFF;
 	
 	//& => nur dieses bit
-	iregs->enable_basic_irqs &= EN_ARM_TIMER_BASIC;
-	iregs->enable_irqs_1 &= EN_SYSTIMER_C1_EN1; 	
-	iregs->enable_irqs_2 &= EN_SYSTIMER_UART_EN2; 	
+	iregs->enable_basic_irqs |= EN_ARM_TIMER_BASIC;
+	iregs->enable_irqs_1 |= EN_SYSTIMER_C1_EN1; 	
+	iregs->enable_irqs_2 |= EN_SYSTIMER_UART_EN2; 	
 	
 	//disablen von allem anderen
 	iregs->disable_basic_irqs &= (select_all & ~EN_ARM_TIMER_BASIC);
@@ -46,6 +46,6 @@ unsigned int interrupt_pos(void) {
 	else {return iregs->irq_basic_pending;}
 }
 
-void pendings(){
-    kprintf("Basic: %x\n", iregs->irq_basic_pending);
+unsigned int pending_status(void) {
+	return (unsigned int) iregs->irq_basic_pending;
 }

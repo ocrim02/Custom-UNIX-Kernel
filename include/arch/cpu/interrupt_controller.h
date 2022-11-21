@@ -18,6 +18,6 @@
 
 void enable_basic_interrupts_disable_rest(void);
 unsigned int interrupt_pos(void);
-void pendings(void);
+unsigned int pending_status(void);
 
 #endif

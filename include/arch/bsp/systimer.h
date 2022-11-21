@@ -12,6 +12,7 @@ void init_systimer_c1(unsigned int timer);
 
 //findet heraus welcher timer den interrupt erzeugt hat
 void timer_irq_solver(int timer);
+unsigned int timer_status(void);
 
 #endif
 

@@ -32,8 +32,8 @@ struct systim_regs* const regs = (struct systim_regs *) SYSTTIMER_BASE;
 //setzt den timer c1
 void init_systimer_c1(unsigned int timer) 
 {
-    regs->cs |= (1<<1);
     regs->c1 = timer;
+    kprintf("Timer is set (probably)\n");
     return;
 }
 //init c 1 2 3 machen wenn 0 geht 
@@ -80,4 +80,8 @@ void timer_irq_solver(int timer)
         //mit true wert wenn einer gefunden wurde in der if abrage ?
         //true wenn rest von allem ok ist ? also status bits (c0,c1,c2,c3) sonst 0 ?
         return;
+}
+
+unsigned int timer_status(void) {
+	return (unsigned int) regs->cs;
 }
