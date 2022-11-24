@@ -15,7 +15,7 @@ void switch_irq_regdump(){
 }
 
 
-void switch_loop_mode(){
+void switch_character_loop_mode(){
     if(character_loop_mode){
 		character_loop_mode = 0;
 	}
@@ -65,6 +65,10 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                         case EN_SYSTIMER_C1_EN1: //was senden denn behandlung
                             if(character_loop_mode == 1){
                                 kprintf("!\n");
+
+                                //abbruch von ausgabe
+                                //wdh wird gestoppt
+                                switch_loop_output(false);
                             }
                             timer_irq_solver(1, TIMER_INTERVAL);
                             break;

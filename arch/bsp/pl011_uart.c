@@ -7,12 +7,58 @@ struct uart_regs{
     unsigned int data;
     unsigned int unused0[5];
     unsigned int fr;
-    unsigned int unused1[8];
+    unsigned int ilpr;
+    unsigned int ibrd;
+    unsigned int fbrd;
+    unsigned int lcrh;
+    unsigned int cr;
+    unsigned int ifls;
+    unsigned int imsc;
     unsigned int ris;
+    unsigned int mis;
+    unsigned int icr;
+    unsigned int dmacr;
+    unsigned int itcr;
+    unsigned int itio;
+    unsigned int itop;
+    unsigned int tdr;
 };
+//fifo geht nicht aus wenn an ist reg ausschalten
+//text unter cr angucken--
+
 
 static volatile
 struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
+
+
+bool loop_mode = false;
+bool loop_output = false;
+char toLoop;
+
+/*
+uart_buffer ubuff;
+uart_buffer* ubuinit = &ubuff;
+init_ubuff(ubuinit);
+*/
+
+void switch_loop_mode(){
+    if(loop_mode){
+	    loop_mode = false;
+    }
+    else{
+        loop_mode  = true;
+   }
+}    
+
+void switch_loop_output(bool on_off){
+    if (on_off) {
+        loop_output = true;
+    }
+    else {
+        loop_output = false;
+    }
+}
+
 
 /*
  * read a single char from uart 
@@ -23,7 +69,11 @@ void read_uart(void)
     //test_kprintf();
     unsigned int dr = 0;
     while (1)
-    {
+    {   
+        if (loop_output) {
+            kprintf("%c", toLoop);
+            read_uart();
+        }
         //wait for empty fifo
         while(read_masked(regs->fr, 4, 4) == 1);
         dr = regs->data;
@@ -43,9 +93,7 @@ void read_uart(void)
         }
         else{
             char character = (char) read_masked(dr, 7, 0);
-            if(character != 0x0){
-                kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
-            }
+
             switch(character){
 			case 'p':
 				//prefetch abort
@@ -67,16 +115,44 @@ void read_uart(void)
 				switch_irq_regdump();
 				break;
 			case 'e':
-				switch_loop_mode();
-				//charcter_loop();
+                switch_character_loop_mode();
+				switch_loop_mode(); 
+                //ausrufezeichen mit abbruch
+				
                 
-                //init ringbuffer
-				break;
+                ///////bit mit case ob in buffer oder nicht in buffer geschrieben
+                //activierung und deact mit e ? und write ?
+
+                break;
+
+            case 'c':
+                //ausführen regchecker
+                break;
 			}
+
+            //if (loop_mode & loop_output) {
+            if (loop_mode && character != 0x0) {
+                switch_loop_output(1);
+                toLoop = character;
+
+                //read_uart();
+                
+                //mit if concatinieren wenn interupt nicht unterbricht
+                //return; //und die beiden if caes für loop nach oben packen wenn funktion ausgeschaltet werden soll
+            }
+            else{
+                if(character != 0x0){
+                    kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
+                }
+            }
+            /*
+            while (loop_output) {
+                kprintf("%c", toLoop);
+            }*/
         }
     }
-    
 }
+
 
 /*
  * writes out character over uart
@@ -89,4 +165,24 @@ void write_uart(char character)
     regs->data = write_masked(0, (unsigned int) character, 7, 0);
 
     return;
+}
+
+void print_uart_regs(void){
+    kprintf("DR:    %x\n", (unsigned int) regs->data);
+    kprintf("FR:    %x\n", (unsigned int) regs->fr);
+    kprintf("ILPR:  %x\n", (unsigned int) regs->ilpr);
+    kprintf("IBRD:  %x\n", (unsigned int) regs->ibrd);
+    kprintf("FBRD:  %x\n", (unsigned int) regs->fbrd);
+    kprintf("LCRH:  %x\n", (unsigned int) regs->lcrh);
+    kprintf("CR:    %x\n", (unsigned int) regs->cr);
+    kprintf("IFLS:  %x\n", (unsigned int) regs->ifls);
+    kprintf("IMSC:  %x\n", (unsigned int) regs->imsc);
+    kprintf("RIS:   %x\n", (unsigned int) regs->ris);
+    kprintf("MIS:   %x\n", (unsigned int) regs->mis);
+    kprintf("ICR:   %x\n", (unsigned int) regs->icr);
+    kprintf("DMACR: %x\n", (unsigned int) regs->dmacr);
+    kprintf("ITCR:  %x\n", (unsigned int) regs->itcr);
+    kprintf("ITIO:  %x\n", (unsigned int) regs->itio);
+    kprintf("ITOP:  %x\n", (unsigned int) regs->itop);
+    kprintf("TDR:   %x\n", (unsigned int) regs->tdr);
 }

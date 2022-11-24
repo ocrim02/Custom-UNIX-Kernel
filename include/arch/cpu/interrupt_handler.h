@@ -67,14 +67,12 @@ enum EXCEPTION_MODE{
 
 //unsigned int get_irq_regdump();
 void switch_irq_regdump();
-//void switch_loop_mode();
+void switch_character_loop_mode();
 void data_fault_source(unsigned int);
 void instruction_fault_source(unsigned int);
-//void interrupt_setup();
 void reset();
 void interrupt(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void spsr_info(unsigned int);
-//unsigned int get_irq_source();
 
 #endif
