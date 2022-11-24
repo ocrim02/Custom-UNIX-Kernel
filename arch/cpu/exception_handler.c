@@ -2,7 +2,6 @@
 
 volatile unsigned int irq_regdump = 0;
 volatile unsigned int character_loop_mode = 0;
-unsigned int counter_me = 0;
 
 void stop(){
     kprintf("stop processor\n");

@@ -17,7 +17,7 @@ static volatile
 struct sys_timer_regs* const regs = (struct sys_timer_regs *) SYS_TIMER_BASE;
 
 void increment_compare(int interval){
-    regs->c1 = (regs->c1 + (unsigned int) interval) % 0xFFFFFFFF;
+    regs->c1 = (regs->lower_bits + (unsigned int) interval) % 0xFFFFFFFF;
 }
 
 void get_pendings_timer(){
