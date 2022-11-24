@@ -35,6 +35,7 @@ void start_kernel(){
 
 	enable_irq(EN_ARM_TIMER_BASIC, EN_SYSTIMER_C1_EN1, EN_SYSTIMER_UART_EN2);
 	init_systimer(1, TIMER_INTERVAL);
+	set_uart_interrupt();
 	
 	//print_uart_regs();
 	read_uart();

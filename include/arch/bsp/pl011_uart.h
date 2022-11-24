@@ -10,8 +10,7 @@
 #include <arch/cpu/interrupt_controller.h>
 */
 
-void switch_loop_mode();   
-void switch_loop_output(bool on_off);
+void switch_loop_mode(); 
 
 void read_uart(void);
 void write_uart(char);

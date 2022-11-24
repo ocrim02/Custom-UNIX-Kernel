@@ -32,8 +32,6 @@ struct uart_regs* const regs = (struct uart_regs *) UART_BASE;
 
 
 bool loop_mode = false;
-bool loop_output = false;
-char toLoop;
 
 /*
 uart_buffer ubuff;
@@ -50,14 +48,13 @@ void switch_loop_mode(){
    }
 }    
 
-void switch_loop_output(bool on_off){
-    if (on_off) {
-        loop_output = true;
-    }
-    else {
-        loop_output = false;
-    }
+void set_uart_interrupt(){
+    regs->imsc = 1<<4;
+    uart_buffer ubuffinit;
+	uart_buffer* ubuinit = &ubuffinit;
+	init_ubuff(ubuinit);
 }
+
 
 
 /*
@@ -70,10 +67,7 @@ void read_uart(void)
     unsigned int dr = 0;
     while (1)
     {   
-        if (loop_output) {
-            kprintf("%c", toLoop);
-            read_uart();
-        }
+        
         //wait for empty fifo
         while(read_masked(regs->fr, 4, 4) == 1);
         dr = regs->data;
@@ -120,6 +114,7 @@ void read_uart(void)
                 //ausrufezeichen mit abbruch
 				
                 
+                
                 ///////bit mit case ob in buffer oder nicht in buffer geschrieben
                 //activierung und deact mit e ? und write ?
 
@@ -132,8 +127,11 @@ void read_uart(void)
 
             //if (loop_mode & loop_output) {
             if (loop_mode && character != 0x0) {
-                switch_loop_output(1);
-                toLoop = character;
+
+                for (int i = 0; i < 65; i++)
+                {
+                    kprintf("%c", character);
+                }
 
                 //read_uart();
                 

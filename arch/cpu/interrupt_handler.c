@@ -68,7 +68,6 @@ void interrupt(enum EXCEPTION_MODE mode, struct dump_regs * regs){
 
                                 //abbruch von ausgabe
                                 //wdh wird gestoppt
-                                switch_loop_output(false);
                             }
                             timer_irq_solver(1, TIMER_INTERVAL);
                             break;
