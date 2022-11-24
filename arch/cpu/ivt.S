@@ -1,7 +1,13 @@
-//.extern interrupt_test
+#define UNDEFINED 1 // Undefined Instruction
+#define	SVC 2 // Supervisor Call
+#define PFABT 3 // Prefetch Abort
+#define DABT 4 // Data Abort
+#define IRQ 5 // Interrupt
+#define FIQ 6 // Fast INterrupt
+#define UNUSED 7  // Unused
 
 .global _ivt
-.balign 32 //maybe 32
+.balign 64
 _ivt:
     b       reset
     ldr     pc, =_undefined_instruction
@@ -12,71 +18,18 @@ _ivt:
     ldr     pc, =_irq
     ldr     pc, =_fiq
 
-.global create_prefetch_abort
-create_prefetch_abort:
-    bkpt #1
-    mov pc, lr
-
-.global create_undefined_instruction
-create_undefined_instruction:
-    udf
-    mov pc, lr
-
-.global create_supervisor_call
-create_supervisor_call:
-    svc #0
-    mov pc, lr
-
-.global create_data_abort
-create_data_abort:
-    mov r0, #0x01
-    ldr r1, [r0]
-    mov pc, lr
-
 
 .global set_ivt
 set_ivt:
-	/* set IVT */
 	ldr r0, =_ivt
 	mcr p15, 0, r0, c12, c0, 0
     mov pc, lr
 
-//Source: VALVERS.COM/open-software/raspberry-pi/bare-metal-programming-in-c-part-4/
-/* .global enable_interrupts
-enable_interrupts:
-	mrs r0, cpsr
-    bic r0, r0 , #0x80
-    msr cpsr_c, r0
-    cpsie i
 
-    mov pc, lr*/
-
-.global get_mode_regs
-get_mode_regs:
-    stmfd sp!, {lr}
-    add r9, r0, #0xc0
-	bl get_processor_mode
-    mov r10, r0
-    ldmfd sp!, {lr}
-
-    msr cpsr_c, r9
-    mov r2, lr
-    mov r3, sp
-    mrs r4, spsr
-    msr cpsr_c, r10
-    stmfd sp!, {r2-r4}
-
-    mov r0, sp
-    mov pc, lr
-
-.global get_processor_mode
-get_processor_mode:
-    mrs r0, cpsr
-    mov pc, lr
-
+reset:
+    b _start
 
 _undefined_instruction:
-    //set lr pipeline offset
     sub lr, lr, #4
     stmfd sp!, {r0-r12, lr}
     mrs r0, sp_usr
@@ -86,16 +39,15 @@ _undefined_instruction:
     mov r4, #0
     stmfd sp!, {r0-r4}
 
-    mov r0, #1
+    mov r0, #UNDEFINED
     mov r1, sp
-    bl  interrupt
+    bl  exception
     
     //go back 
     ldmfd sp!, {r0-r4}
     ldmfd sp!, {r0-r12, pc}^
     
 _software_interrupt:
-    //set lr pipeline offset
     sub lr, lr, #4
     stmfd sp!, {r0-r12, lr}
     mrs r0, sp_usr
@@ -105,16 +57,15 @@ _software_interrupt:
     mov r4, #0
     stmfd sp!, {r0-r4}
 
-    mov r0, #2
+    mov r0, #SVC
     mov r1, sp
-    bl  interrupt
+    bl  exception
     
     //go back 
     ldmfd sp!, {r0-r4}
     ldmfd sp!, {r0-r12, pc}^
 
 _prefetch_abort:
-    //set lr pipeline offset
     sub lr, lr, #4
     stmfd sp!, {r0-r12, lr}
     mrs r0, sp_usr
@@ -124,9 +75,9 @@ _prefetch_abort:
     mrc p15, 0, r4, c6, c0, 2       //IFAR Data Fault Address
     stmfd sp!, {r0-r4}
 
-    mov r0, #3
+    mov r0, #PFABT
     mov r1, sp
-    bl  interrupt
+    bl  exception
 
     //go back 
     ldmfd sp!, {r0-r4}
@@ -134,7 +85,6 @@ _prefetch_abort:
     
 
 _data_abort:
-    //set lr pipeline offset
     sub lr, lr, #8
     stmfd sp!, {r0-r12, lr}
     mrs r0, sp_usr
@@ -144,16 +94,15 @@ _data_abort:
     mrc p15, 0, r4, c6, c0, 0       //DFAR Data Fault Address
     stmfd sp!, {r0-r4}
 
-    mov r0, #4
+    mov r0, #DABT
     mov r1, sp
-    bl  interrupt
+    bl  exception
 
     //go back 
     ldmfd sp!, {r0-r4}
     ldmfd sp!, {r0-r12, pc}^
 
 _not_used:
-    //set lr pipeline offset
     sub lr, lr, #4
     stmfd sp!, {r0-r12, lr}
     mrs r0, sp_usr
@@ -163,9 +112,9 @@ _not_used:
     mov r4, #0
     stmfd sp!, {r0-r4}
 
-    mov r0, #7
+    mov r0, #UNUSED
     mov r1, sp
-    bl  interrupt
+    bl  exception
 
     //go back 
     ldmfd sp!, {r0-r4}
@@ -173,7 +122,6 @@ _not_used:
 
 
 _irq:
-    //set lr pipeline offset
     sub lr, lr, #4
     stmfd sp!, {r0-r12, lr}
     mrs r0, sp_usr
@@ -183,9 +131,9 @@ _irq:
     mov r4, #0
     stmfd sp!, {r0-r4}
 
-    mov r0, #5
+    mov r0, #IRQ
     mov r1, sp
-    bl  interrupt
+    bl  exception
 
     //go back 
     ldmfd sp!, {r0-r4}
@@ -193,7 +141,6 @@ _irq:
 
 
 _fiq:
-    //set lr pipeline offset
     sub lr, lr, #4
     stmfd sp!, {r0-r12, lr}
     mrs r0, sp_usr
@@ -203,9 +150,9 @@ _fiq:
     mov r4, #0
     stmfd sp!, {r0-r4}
 
-    mov r0, #6
+    mov r0, #FIQ
     mov r1, sp
-    bl  interrupt
+    bl  exception
 
     //go back 
     ldmfd sp!, {r0-r4}

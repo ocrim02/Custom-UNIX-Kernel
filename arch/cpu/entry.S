@@ -1,3 +1,7 @@
+#define __ASSEMBLY__
+#include <arch/cpu/cpu.h>
+#undef __ASSEMBLY__
+
 .section .init
 
 .global _start
@@ -36,28 +40,22 @@ _enableAlignCheck:
 _bsprak:
 	/* Validen Stack Pointer setzten */
 	
-	//cps #0x10
 	ldr sp,=0x100000
-	//cpsie i
 
-	cps #0x12
-	ldr sp, =#134201344
-	//cpsie i
+	cps #IRQ_MODE
+	ldr sp, =IRQ_SP
 
-	cps #0x17
-	ldr sp, =#134205440
-	//cpsie i
+	cps #ABT_MODE
+	ldr sp, =ABT_SP
 
-	cps #0x1B
-	ldr sp, =#134209536
-	//cpsie i
+	cps #UND_MODE
+	ldr sp, =UND_SP
 
-	cps #0x1F
-	ldr sp, =#134213632
-	//cpsie i
+	cps #SYS_MODE
+	ldr sp, =SYS_SP
 
-	cps #0x13
-	ldr sp, =#134217728
+	cps #SVC_MODE
+	ldr sp, =SVC_SP
 	cpsie i
 
 	/* Zu c Code springen */

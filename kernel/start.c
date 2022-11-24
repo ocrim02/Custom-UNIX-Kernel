@@ -14,8 +14,10 @@
 #include <arch/bsp/pl011_uart.h>
 #include <config.h>
 #include <arch/cpu/interrupt.h>
-#include <arch/cpu/timer.h>
+#include <arch/bsp/timer.h>
 #include <arch/cpu/ivt.h>
+#include <tests/regcheck.h>
+#include <arch/cpu/exception_creator.h>
 
 volatile unsigned int counter = 0;
 
@@ -75,6 +77,10 @@ void start_kernel(){
 			case 'e':
 				switch_loop_mode();
 				charcter_loop();
+				break;
+			case 'c':
+				switch_loop_mode();
+				register_checker();
 				break;
 		}
 

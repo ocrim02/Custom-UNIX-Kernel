@@ -1,3 +1,4 @@
+
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
@@ -23,7 +24,7 @@ static inline void test_kprintf(void) {
 	 * Hier Test Funktion für kprintf schreiben und
 	 * nach dem vollständigen initialisieren aufrufen
 	 */
-	
+	kprintf("Tests");
 }
 
 /**

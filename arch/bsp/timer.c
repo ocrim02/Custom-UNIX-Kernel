@@ -1,4 +1,4 @@
-#include <arch/cpu/timer.h>
+#include <arch/bsp/timer.h>
 #include <lib/utils.h>
 
 #define SYS_TIMER_BASE (0x7E003000 - 0x3F000000)
@@ -32,9 +32,8 @@ void ack_timer_interrupt(unsigned int cmp){
     regs->control |= 1 << cmp;
 }
 
-// do not unse for precise timings
+// do not use for precise timings
 void busy_wait(unsigned int duration){
-    duration = duration -59;    //correct for the time wait() takes
     unsigned int start_time = regs->lower_bits;
     unsigned int stop_time = (start_time + duration) % 0xFFFFFFFF;
     
