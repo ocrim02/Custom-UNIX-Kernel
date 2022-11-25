@@ -4,7 +4,7 @@
 #define undefeq .word 0x07ffffff
 
 #define __ASSEMBLY__
-//#include <config.h>
+#include <config.h>
 #undef __ASSEMBLY__
 
 /* Kann als backup genutzt werden, falls Qemu undefne/undefeq nicht
@@ -38,9 +38,9 @@ _check_throw_undef:
 _check_return_jump:
 	/*mov	r0, #0x08000000*/
 #ifdef __QEMU__
-	mov	r0, #0x80000000
+	mov	r0, #0x80000000		/*0x80000000 */
 #else
-	mov	r0, #0x80000000		/*0x00800000 */
+	mov	r0, #0x00800000
 #endif
 	b	1f
 	undef
@@ -207,7 +207,7 @@ _check_cpsr:
 #ifdef __QEMU__
 	cmp	r0, #0x0A000000
 #else
-	cmp	r0, #0x0A000000		/* 0x01000000 */
+	cmp	r0, #0x01000000
 #endif
 	bne	1b
 
@@ -265,7 +265,7 @@ _check_spsr:
 #ifdef __QEMU__
 	cmp	r0, #0x0A000000
 #else
-	cmp	r0, #0x0A000000		/* 0x01000000 */
+	cmp	r0, #0x01000000	
 #endif
 	bne	1b
 

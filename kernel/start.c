@@ -32,7 +32,7 @@ void charcter_loop(){
 		if(character != 0){
 			for(int i=0; i<40; i++){
 				kprintf("%c", character);
-				busy_wait(30000);
+				busy_wait(BUSY_WAIT_COUNTER);
 			}
 		}
 	}

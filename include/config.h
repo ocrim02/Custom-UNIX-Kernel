@@ -18,14 +18,13 @@
  */
 
 /* Include-Pfad bitte gegenfalls anpassen */
-#include <lib/utils.h> 
-static inline void test_kprintf(void) {
+//#include <lib/utils.h> 
+//static inline void test_kprintf(void) {
 	/* Nur für Aufgabenblatt 1
 	 * Hier Test Funktion für kprintf schreiben und
 	 * nach dem vollständigen initialisieren aufrufen
 	 */
-	kprintf("Tests");
-}
+//}
 
 /**
  * Erst ab Aufgabenblatt 2 relevant
@@ -33,7 +32,7 @@ static inline void test_kprintf(void) {
 
 #ifdef __QEMU__
 /* Werte zum testen unter QEMU */
-#define BUSY_WAIT_COUNTER 10000000
+#define BUSY_WAIT_COUNTER 30000		/* was 10M before but seemed a bit to high*/
 #else
 /* Werte zum testen auf der Hardware */
 #define BUSY_WAIT_COUNTER 30000
