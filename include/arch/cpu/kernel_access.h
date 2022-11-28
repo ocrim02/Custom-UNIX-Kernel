@@ -5,5 +5,4 @@
 
 unsigned int get_processor_mode();
 struct mode_regs* get_mode_regs(unsigned int);
-
 #endif

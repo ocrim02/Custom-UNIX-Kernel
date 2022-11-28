@@ -168,6 +168,7 @@ void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs * regs){
     kprintf("R4: 0x%08x  R9: 0x%08x\n", regs->r4, regs->r9);
     kprintf("\n");
 
+
     kprintf(">> Modusspezifische Register <<\n");
     kprintf("User/System | LR: 0x%08x | SP: 0x%08x\n", regs->lr, regs->sp);
     struct mode_regs* mod_regs = (struct mode_regs*) get_mode_regs(IRQ_MODE);
