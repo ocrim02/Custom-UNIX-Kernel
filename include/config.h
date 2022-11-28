@@ -34,7 +34,7 @@ static inline void test_kprintf(void) {
 
 #ifdef __QEMU__
 /* Werte zum testen unter QEMU */
-#define BUSY_WAIT_COUNTER 30000		/* was 10M before but seemed a bit to high*/
+#define BUSY_WAIT_COUNTER 10000000
 #else
 /* Werte zum testen auf der Hardware */
 #define BUSY_WAIT_COUNTER 30000

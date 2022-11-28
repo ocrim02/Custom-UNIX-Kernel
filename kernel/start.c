@@ -66,7 +66,7 @@ void start_kernel(){
 					if(character != 0){
 						for(int i=0; i<40; i++){
 							kprintf("%c", character);
-							busy_wait(BUSY_WAIT_COUNTER);
+							loop_wait(BUSY_WAIT_COUNTER);
 						}
 					}
 				}

@@ -36,6 +36,10 @@ void ack_timer_interrupt(unsigned int cmp){
     regs->control |= 1 << cmp;
 }
 
+void loop_wait(unsigned int duration){
+    for(unsigned int i=0; i<duration; i++){}
+}
+
 // do not use for precise timings
 void busy_wait(unsigned int duration){
     unsigned int start_time = regs->lower_bits;
