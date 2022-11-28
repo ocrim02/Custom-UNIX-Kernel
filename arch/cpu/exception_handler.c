@@ -3,13 +3,14 @@
 volatile unsigned int irq_regdump = 0;
 volatile unsigned int character_loop_mode = 0;
 
+/*
+* infinite loop for processor
+* used for unsresolvable errors
+*/
 void stop(){
-    kprintf("stop processor\n");
+    kprintf("No jump back for this case...\n");
+    kprintf("stop\n");
     while(1);
-}
-
-unsigned int get_irq_regdump(){
-    return irq_regdump;
 }
 
 void switch_irq_regdump(){
@@ -61,22 +62,23 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                         kprintf("!\n");
 
                     }
-                    increment_compare(TIMER_INTERVAL);
-                    ack_timer_interrupt(1);
+                    increment_compare(TIMER_INTERVAL, C1);
+                    ack_timer_interrupt(C1);
                     break;
                 case UART:
                     put_ring_buffer(read_uart());
                     break;
-
             }
             break;
-
         default:
             kprintf("Undefined Exception\n");
             break;
     }
 }
 
+/*
+* Creates SPSR Flag info print
+*/
 void spsr_info(unsigned int spsr){
     if(spsr == 0){
         kprintf(" | SPSR: ____ _ ___     Invalid 0x00000000\n");

@@ -5,6 +5,8 @@
 #define ENABLE_IRQ_1 0x210
 #define ENABLE_IRQ_2 0x214
 #define ENABLE_IRQ_BASIC 0x218
+#define ARM_TIMER_INT_BIT 1
+#define ARM_UART_INT_BIT 25
 
 struct interrupt_enables{
     unsigned int basic_pending;
@@ -20,11 +22,9 @@ static volatile
 struct interrupt_enables* const enable = (struct interrupt_enables*) (INTERRUPT_BASE + BASIC_PENDING_OFFSET);
 
 
-
 void interrupt_setup(){
-    enable->en1 = 1 << 1;
-    enable->en2 = 1 << 25;
-    enable->base_enable = 1<<0;
+    enable->en1 = 1 << ARM_TIMER_INT_BIT;
+    enable->en2 = 1 << ARM_UART_INT_BIT;
 }
 
 void pendings(){

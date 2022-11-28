@@ -17,14 +17,16 @@
  * auch gerne selbst verändern.
  */
 
+#ifndef __ASSEMBLY__
 /* Include-Pfad bitte gegenfalls anpassen */
-//#include <lib/utils.h> 
-//static inline void test_kprintf(void) {
+#include <lib/utils.h> 
+static inline void test_kprintf(void) {
 	/* Nur für Aufgabenblatt 1
 	 * Hier Test Funktion für kprintf schreiben und
 	 * nach dem vollständigen initialisieren aufrufen
 	 */
-//}
+}
+#endif
 
 /**
  * Erst ab Aufgabenblatt 2 relevant

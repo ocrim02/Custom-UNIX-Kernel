@@ -1,18 +1,7 @@
 #include <arch/bsp/pl011_uart.h>
 
 #define UART_BASE (0x7E201000 - 0x3F000000)
-
-
-struct uart_regs{
-    unsigned int data;
-    unsigned int unused0[5];
-    unsigned int fr;
-    unsigned int unused1[7];
-    unsigned int imsc;
-    unsigned int ris;
-    unsigned int mis;
-    unsigned int icr;
-};
+#define UART_RX_INT_ENABLE 4
 
 struct uart_ring_buffer{
     unsigned int head;
@@ -54,7 +43,7 @@ char pop_ring_buffer(){
 }
 
 void setup_int_uart(){
-    regs->imsc = 1 << 4;
+    regs->imsc = 1 << UART_RX_INT_ENABLE;
     init_ring_buffer();
 }
 

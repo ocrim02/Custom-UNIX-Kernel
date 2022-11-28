@@ -38,7 +38,7 @@ _check_throw_undef:
 _check_return_jump:
 	/*mov	r0, #0x08000000*/
 #ifdef __QEMU__
-	mov	r0, #0x80000000		/*0x80000000 */
+	mov	r0, #0x80000000	
 #else
 	mov	r0, #0x00800000
 #endif

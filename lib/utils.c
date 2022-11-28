@@ -176,11 +176,6 @@ char* eight_number(char* extendet_number, char* number, bool spaces, bool zeros)
         }
         return extendet_number;
     }
-    //error number to big
-    else if((zeros == true || spaces == true) && len > 8){
-        kprintf("\nERROR while calling eight_number(char*, bool, bool), char* is longer than 8 characters.\n");
-        return NULL;
-    }
     else{
         return number;
     }

@@ -3,21 +3,25 @@
 
 #define SYS_TIMER_BASE (0x7E003000 - 0x3F000000)
 
-struct sys_timer_regs{
-    unsigned int control;
-    unsigned int lower_bits;
-    unsigned int higher_bits;
-    unsigned int c0;
-    unsigned int c1;
-    unsigned int c2;
-    unsigned int c3;
-};
-
 static volatile
 struct sys_timer_regs* const regs = (struct sys_timer_regs *) SYS_TIMER_BASE;
 
-void increment_compare(int interval){
-    regs->c1 = (regs->lower_bits + (unsigned int) interval) % 0xFFFFFFFF;
+void increment_compare(int interval, int comparator){
+    switch(comparator){
+    case 0:
+        regs->c0 = (regs->lower_bits + (unsigned int) interval) % 0xFFFFFFFF;
+        break;
+    case 1:
+        regs->c1 = (regs->lower_bits + (unsigned int) interval) % 0xFFFFFFFF;
+        break;
+    case 2:
+        regs->c2 = (regs->lower_bits + (unsigned int) interval) % 0xFFFFFFFF;
+        break;
+    default:
+        regs->c3 = (regs->lower_bits + (unsigned int) interval) % 0xFFFFFFFF;
+        break;
+    }
+    
 }
 
 void get_pendings_timer(){

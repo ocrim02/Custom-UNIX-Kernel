@@ -26,30 +26,15 @@ void increment_counter() {
 	counter++;
 }
 
-void charcter_loop(){
-	while(1){
-		char character = pop_ring_buffer();
-		if(character != 0){
-			for(int i=0; i<40; i++){
-				kprintf("%c", character);
-				busy_wait(BUSY_WAIT_COUNTER);
-			}
-		}
-	}
-}
-
 
 void start_kernel(){
 	set_ivt();
 	interrupt_setup();
-	increment_compare(TIMER_INTERVAL);
+	increment_compare(TIMER_INTERVAL, C1);
 	setup_int_uart();
-	
-	//pendings();
 	
 
 	while(1){
-		//char character = read_uart();
 		char character = pop_ring_buffer();
 		if(character != 0){
 			kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
@@ -76,7 +61,15 @@ void start_kernel(){
 				break;
 			case 'e':
 				switch_loop_mode();
-				charcter_loop();
+				while(1){
+					char character = pop_ring_buffer();
+					if(character != 0){
+						for(int i=0; i<40; i++){
+							kprintf("%c", character);
+							busy_wait(BUSY_WAIT_COUNTER);
+						}
+					}
+				}
 				break;
 			case 'c':
 				switch_loop_mode();

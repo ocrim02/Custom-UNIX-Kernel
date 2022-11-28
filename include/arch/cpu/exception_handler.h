@@ -15,6 +15,14 @@ enum EXCEPTION_MODE{
     EX_UNU   = 7  // Unused
 };
 
+enum INTERRUPT_SOURCE{
+    SYS_TIMER_1 = 0,
+    SYS_TIMER_2 = 1,
+    SYS_TIMER_3 = 2,
+    SYS_TIMER_4 = 3,
+    UART = 57
+};
+
 struct dump_regs{
     unsigned int sp;
     unsigned int lr;
@@ -44,6 +52,8 @@ struct mode_regs{
     unsigned int spsr;
 };
 
+void switch_irq_regdump();
+void switch_loop_mode();
 void exception(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs* regs);
 void spsr_info(unsigned int);
