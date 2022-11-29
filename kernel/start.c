@@ -13,19 +13,71 @@
 
 #include <arch/bsp/pl011_uart.h>
 #include <config.h>
+#include <arch/cpu/interrupt.h>
+#include <arch/bsp/timer.h>
+#include <arch/cpu/ivt.h>
+#include <tests/regcheck.h>
+#include <arch/cpu/exception_creator.h>
 
 volatile unsigned int counter = 0;
+
 
 void increment_counter() {
 	counter++;
 }
 
 
-
 void start_kernel(){
+	set_ivt();
+	interrupt_setup();
+	increment_compare(TIMER_INTERVAL, C1);
+	setup_int_uart();
+	
 
-	test_kprintf();
-	read_uart();
+	while(1){
+		char character = pop_ring_buffer();
+		if(character != 0){
+			kprintf("Es wurde folgender Charakter eingegeben: %c, In Hexadezimal: %x, In Dezimal %u\n", character, (unsigned int) character, (unsigned int) character);
+		}
+		switch(character){
+			case 'p':
+				//prefetch abort
+				create_prefetch_abort();
+				break;
+			case 's':
+				//supervisor call
+				create_supervisor_call();
+				break;
+			case 'a':
+				//data abort
+				create_data_abort();
+				break;
+			case 'u':
+				//undefined instruction
+				create_undefined_instruction();
+				break;
+			case 'd':
+				switch_irq_regdump();
+				break;
+			case 'e':
+				switch_loop_mode();
+				while(1){
+					char character = pop_ring_buffer();
+					if(character != 0){
+						for(int i=0; i<40; i++){
+							kprintf("%c", character);
+							busy_wait(BUSY_WAIT_COUNTER);
+						}
+					}
+				}
+				break;
+			case 'c':
+				switch_loop_mode();
+				register_checker();
+				break;
+		}
+
+	}
 
 	// Endless counter
 	for (;;) {
@@ -33,3 +85,5 @@ void start_kernel(){
 	}
 
 }
+
+

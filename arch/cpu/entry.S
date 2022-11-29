@@ -1,3 +1,6 @@
+#define __ASSEMBLY__
+#include <arch/cpu/cpu.h>
+#undef __ASSEMBLY__
 
 .section .init
 
@@ -36,9 +39,28 @@ _enableAlignCheck:
 
 _bsprak:
 	/* Validen Stack Pointer setzten */
+	
 	ldr sp,=0x100000
+
+	cps #IRQ_MODE
+	ldr sp, =IRQ_SP
+
+	cps #ABT_MODE
+	ldr sp, =ABT_SP
+
+	cps #UND_MODE
+	ldr sp, =UND_SP
+
+	cps #SYS_MODE
+	ldr sp, =SYS_SP
+
+	cps #SVC_MODE
+	ldr sp, =SVC_SP
+	cpsie i
+
 	/* Zu c Code springen */
 	bl  start_kernel
+
 .Lend:
 	WFI
 	b .Lend
@@ -68,5 +90,6 @@ _exitHyper:
 	orr r0, r0, #0x13	//Supervisormode
 	msr spsr_hyp, r0
 	eret
+	
 
 #undef __ASSEMBLY__
