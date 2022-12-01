@@ -127,7 +127,7 @@ _irq:
     mrs r0, sp_usr
     mrs r1, lr_usr
     mrs r2, spsr
-    mrs r3, cpsr
+    mrs r3, #0
     mov r4, #0
     stmfd sp!, {r0-r4}
 

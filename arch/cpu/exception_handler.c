@@ -161,11 +161,11 @@ void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs * regs){
 
     kprintf("\n");
     kprintf(">> Registerschnappschuss <<\n");
-    kprintf("R0: 0x%08x  R5: 0x%08x  R10: 0x%08x\n", regs->r0, regs->r5, regs->r10);
-    kprintf("R1: 0x%08x  R6: 0x%08x  R11: 0x%08x\n", regs->r1, regs->r6, regs->r11);
-    kprintf("R2: 0x%08x  R7: 0x%08x  R12: 0x%08x\n", regs->r2, regs->r7, regs->r12);
-    kprintf("R3: 0x%08x  R8: 0x%08x\n", regs->r3, regs->r8);
-    kprintf("R4: 0x%08x  R9: 0x%08x\n", regs->r4, regs->r9);
+    kprintf("R0: 0x%08x  R5: 0x%08x  R10: 0x%08x\n", regs->r[0], regs->r[5], regs->r[10]);
+    kprintf("R1: 0x%08x  R6: 0x%08x  R11: 0x%08x\n", regs->r[1], regs->r[6], regs->r[11]);
+    kprintf("R2: 0x%08x  R7: 0x%08x  R12: 0x%08x\n", regs->r[2], regs->r[7], regs->r[12]);
+    kprintf("R3: 0x%08x  R8: 0x%08x\n", regs->r[3], regs->r[8]);
+    kprintf("R4: 0x%08x  R9: 0x%08x\n", regs->r[4], regs->r[9]);
     kprintf("\n");
 
 

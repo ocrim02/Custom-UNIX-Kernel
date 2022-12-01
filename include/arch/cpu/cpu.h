@@ -9,6 +9,9 @@
 #define UND_SP (MAX_RAM_ADDR - (SP_SIZE * 3))
 #define SVC_SP (MAX_RAM_ADDR - (SP_SIZE * 4))
 
+#define THREAD_SP_SIZE (1024 * 8)
+#define THREAD_SP_BASE (MAX_RAM_ADDR - (SP_SIZE * 5))
+
 #define USR_MODE (0x10)
 #define FIQ_MODE (0x11)
 #define IRQ_MODE (0x12)
