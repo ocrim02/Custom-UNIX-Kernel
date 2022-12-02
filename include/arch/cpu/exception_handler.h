@@ -4,6 +4,8 @@
 #include <arch/cpu/cpu.h>
 #include <arch/cpu/interrupt.h>
 #include <arch/cpu/kernel_access.h>
+#include <kernel/thread.h>
+#include <user/main.h>
 
 enum EXCEPTION_MODE{
 	EX_UND   = 1, // Undefined Instruction

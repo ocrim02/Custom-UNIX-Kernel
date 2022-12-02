@@ -36,21 +36,44 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
         case EX_UND:
             kprintf("Undefined Instruction\n");
             reg_dump(mode, regs);
-            stop();
+            if(read_masked(regs->spsr, 4, 0) == USR_MODE){
+                kprintf("Thread ran into unresolvable Error... Thread reset.\n");
+                change_thread(regs, Finished);
+            }
+            else{
+                stop();
+            }
             break;
         case EX_SVC:
-            kprintf("Supervisor Call\n");
-            reg_dump(mode, regs);
-            stop();
+            if(read_masked(regs->spsr, 4, 0) == USR_MODE){
+                change_thread(regs, Finished);
+            }
+            else{
+                kprintf("Supervisor Call\n");
+                reg_dump(mode, regs);
+                stop();
+            }
             break;
         case EX_PFABT:
             kprintf("Prefetch Abort\n");
             reg_dump(mode, regs);
-            stop();
+            if(read_masked(regs->spsr, 4, 0) == USR_MODE){
+                kprintf("Thread ran into unresolvable Error... Thread reset.\n");
+                change_thread(regs, Finished);
+            }
+            else{
+                stop();
+            }
             break;
         case EX_DABT:
             reg_dump(mode, regs);
-            stop();
+            if(read_masked(regs->spsr, 4, 0) == USR_MODE){
+                kprintf("Thread ran into unresolvable Error... Thread reset.\n");
+                change_thread(regs, Finished);
+            }
+            else{
+                stop();
+            }
             break;
         case EX_IRQ:
             if(irq_regdump){
@@ -60,13 +83,33 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                 case SYS_TIMER_2:
                     if(character_loop_mode == 1){
                         kprintf("!\n");
-
                     }
+                    change_thread(regs, Finished);
                     increment_compare(TIMER_INTERVAL, C1);
                     ack_timer_interrupt(C1);
                     break;
                 case UART:
                     put_ring_buffer(read_uart());
+                    const char input = pop_ring_buffer();
+
+                    switch(input){
+                        case 'S':
+                            create_supervisor_call();
+                            break;
+                        case 'P':
+                            create_prefetch_abort();
+                            break;
+                        case 'A':
+                            create_data_abort();
+                            break;
+                        case 'U':
+                            create_undefined_instruction();
+                            break;
+                        default:
+                            thread_create(&main, &input, 1); 
+                            break;
+                    }
+                    
                     break;
             }
             break;

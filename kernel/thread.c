@@ -1,8 +1,7 @@
-#include <arch/cpu/cpu.h>
-#include <arch/cpu/exception_handler.h>
-#include <arch/cpu/exception_creator.h>
+#include <kernel/thread.h>
 
 #define PCR_USR_IFT 240
+#define IDLE_THREAD_COUNT 1
 #define THREAD_COUNT 32
 #define NULL 0
 
@@ -19,13 +18,6 @@ struct tcb{
     struct tcb *rq_prev;
 };
 
-enum{
-    Ready = 0,
-    Running = 1,
-    Waiting = 2,
-    Finished = 3,
-};
-
 /*
 runqueue points to thread selected to run
 runqueue->next is the next in the list
@@ -35,14 +27,24 @@ first     second     third
 next ->             
 */
 
-struct tcb tcbs[THREAD_COUNT];
+struct tcb tcbs[THREAD_COUNT + IDLE_THREAD_COUNT];
 
 struct tcb *runqueue;
 
-void change_thread(struct dump_regs* regs, unsigned int reason){
+void change_thread(struct dump_regs* regs, enum THREAD_STATE reason){
     struct tcb* current_thread = runqueue;
     struct tcb* next_thread = runqueue->rq_next;
-    runqueue = next_thread;
+    if(next_thread->state != Ready && reason == Finished){
+        next_thread = idle_thread();
+    }
+    else if(next_thread->state != Ready && reason != Finished){
+        //no change
+        return;
+    }
+    else{
+        runqueue = next_thread;
+    }
+    
 
     for(int i=0; i<13; i++){
         current_thread->r[i] = regs->r[i];
@@ -71,17 +73,41 @@ void change_thread(struct dump_regs* regs, unsigned int reason){
 
 }
 
+struct tcb* idle_thread(){
+    tcbs[32].pc = (unsigned int) &wait_for_int;
+    tcbs[32].lr = (unsigned int) &create_supervisor_call;
+    tcbs[32].cpsr = PCR_USR_IFT;
+    tcbs[32].state = Ready;
+
+    return &tcbs[32];
+}
+
 void thread_create(void (*func)(void *), const void *args, unsigned int args_size){
     struct tcb *free_thread = get_free_thread();
     if(free_thread == NULL){
         kprintf("No free thread available\n");
         return;
     }
+    kprintf("loc: %u\n", (unsigned int) args);
+    /*kprintf("id: %u\n", free_thread->id);
+    kprintf("loc: %u\n", free_thread->sp);
+    kprintf("arg: %x\n", *((unsigned int*) args));
+    kprintf("arg: %x\n", *((unsigned int*) args + 4));
+    kprintf("cont: %x\n", *((unsigned int*) free_thread->sp));*/
+    for(unsigned int i=(args_size+3)/4; i>0; i--){
+        *((unsigned int*) free_thread->sp) = *((unsigned int*) args);
+        free_thread->sp = free_thread->sp - 4;
+        args = args + 4;
+    }
+    free_thread->sp = free_thread->sp + ((args_size+3)/4)*4;
+    /*kprintf("cont: %x\n", *((unsigned int*) free_thread->sp));
+    free_thread->sp = free_thread->sp + 4;
+    kprintf("cont: %x\n", *((unsigned int*) free_thread->sp));*/
 
-    free_thread->pc = func;
+    free_thread->pc = (unsigned int) func;
     free_thread->lr = (unsigned int) &create_supervisor_call;
     free_thread->cpsr = PCR_USR_IFT;
-    free_thread->r[0] = args;
+    free_thread->r[0] = free_thread->sp;
     free_thread->r[1] = args_size;
 
     free_thread->state = Ready;
@@ -93,21 +119,30 @@ void thread_create(void (*func)(void *), const void *args, unsigned int args_siz
 
 struct tcb* get_free_thread(){
     if(runqueue->rq_prev->state != Finished){
-        kprintf("No free Thread");
+        kprintf("%u\n", runqueue->state);
+        kprintf("%u\n", runqueue->id);
+        kprintf("%u\n", runqueue->rq_prev->state);
+        kprintf("%u\n", runqueue->rq_prev->id);
         return NULL;
     }
     return runqueue->rq_prev;
 }
 
 void init_threads(){
-    for(int i=0; i<THREAD_COUNT; i++){
+    for(int i=0; i<(THREAD_COUNT); i++){
         tcbs[i].rq_next = &tcbs[(i+1)%THREAD_COUNT];
-        tcbs[i].rq_prev = &tcbs[(i-1)%THREAD_COUNT];
+        tcbs[i].rq_prev = &tcbs[(i+(THREAD_COUNT-1))%THREAD_COUNT];
         tcbs[i].state = Finished;
         tcbs[i].id = i;
-        tcbs[i].sp = (THREAD_SP_BASE + THREAD_SP_SIZE * i);
+        tcbs[i].sp = (THREAD_SP_BASE - THREAD_SP_SIZE * i);
     }
     runqueue = &tcbs[0];
+
+    tcbs[THREAD_COUNT].rq_next = NULL;
+    tcbs[THREAD_COUNT].rq_prev = NULL;
+    tcbs[THREAD_COUNT].state = Ready;
+    tcbs[THREAD_COUNT].id = THREAD_COUNT;
+    tcbs[THREAD_COUNT].sp = (THREAD_SP_BASE - THREAD_SP_SIZE * THREAD_COUNT);
 }
 
 void add_to_queue_start(struct tcb* thread){
@@ -143,6 +178,8 @@ void reset_thread(struct tcb* thread){
     thread->state = Finished;
     thread->sp = (THREAD_SP_BASE + THREAD_SP_SIZE * thread->id);
 }
-/*
-* stackpointer zurück auf ursprung
-*/
+
+struct tcb* current_thread(){
+    return runqueue;
+}
+
