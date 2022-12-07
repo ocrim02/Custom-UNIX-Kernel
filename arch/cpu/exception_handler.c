@@ -82,9 +82,9 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             switch(get_irq_source()){
                 case SYS_TIMER_2:
                     if(character_loop_mode == 1){
-                        kprintf("!\n");
+                        kprintf("!");
                     }
-                    change_thread(regs, Finished);
+                    change_thread(regs, Ready);
                     increment_compare(TIMER_INTERVAL, C1);
                     ack_timer_interrupt(C1);
                     break;
@@ -107,6 +107,7 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                             break;
                         default:
                             thread_create(&main, &input, 1); 
+                            change_thread(regs, Ready);
                             break;
                     }
                     

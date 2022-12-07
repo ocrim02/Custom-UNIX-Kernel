@@ -137,6 +137,9 @@ _irq:
 
     //go back 
     ldmfd sp!, {r0-r4}
+    msr sp_usr, r0
+    msr lr_usr, r1
+    msr spsr_cxsf, r2
     ldmfd sp!, {r0-r12, pc}^
 
 

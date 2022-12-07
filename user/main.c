@@ -3,9 +3,8 @@
 #define PRINT_COUNT 9
 
 void main(void* args){
-	kprintf("start\n");
+	//kprintf("start\n");
 	char c = *((char*) args);
-	kprintf("%u\n", args);
 
 	switch(c){
 		case 'a':
@@ -27,7 +26,9 @@ void main(void* args){
 
 	for(unsigned int n=0; n<PRINT_COUNT; n++){
 		volatile unsigned int i = 0;
-		for(; i<BUSY_WAIT_COUNTER; i++){}
-		kprintf("%s", c);
+		for(; i<(BUSY_WAIT_COUNTER*10); i++){}
+		kprintf("%c", c);
 	}
+
+	return;
 }

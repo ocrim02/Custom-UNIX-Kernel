@@ -12,7 +12,10 @@ enum THREAD_STATE{
     Finished = 3,
 };
 
-void change_thread(struct dump_regs* regs, enum THREAD_STATE);
+typedef struct dump_regs dump_regs;
+
+
+void change_thread(struct dump_regs*, enum THREAD_STATE);
 void thread_create(void (*func)(void *), const void*, unsigned int);
 struct tcb* get_free_thread();
 void init_threads();
