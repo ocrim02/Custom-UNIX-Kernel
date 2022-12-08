@@ -1,9 +1,8 @@
 #include <user/main.h>
 
-#define PRINT_COUNT 9
+#define PRINT_COUNT 20
 
 void main(void* args){
-	//kprintf("start\n");
 	char c = *((char*) args);
 
 	switch(c){
@@ -26,7 +25,7 @@ void main(void* args){
 
 	for(unsigned int n=0; n<PRINT_COUNT; n++){
 		volatile unsigned int i = 0;
-		for(; i<(BUSY_WAIT_COUNTER*10); i++){}
+		for(; i<(BUSY_WAIT_COUNTER); i++){}
 		kprintf("%c", c);
 	}
 
