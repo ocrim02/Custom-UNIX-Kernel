@@ -23,6 +23,7 @@ void add_to_queue_start(struct tcb*);
 void add_to_queue_end(struct tcb*);
 void reset_thread(struct tcb*);
 struct tcb* idle_thread();
+struct tcb* next_in_queue();
 
 
 #endif /* THREAD */

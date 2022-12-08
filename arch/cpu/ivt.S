@@ -45,6 +45,9 @@ _undefined_instruction:
     
     //go back 
     ldmfd sp!, {r0-r4}
+    msr sp_usr, r0
+    msr lr_usr, r1
+    msr spsr_cxsf, r2
     ldmfd sp!, {r0-r12, pc}^
     
 _software_interrupt:
@@ -63,6 +66,9 @@ _software_interrupt:
     
     //go back 
     ldmfd sp!, {r0-r4}
+    msr sp_usr, r0
+    msr lr_usr, r1
+    msr spsr_cxsf, r2
     ldmfd sp!, {r0-r12, pc}^
 
 _prefetch_abort:
@@ -81,6 +87,9 @@ _prefetch_abort:
 
     //go back 
     ldmfd sp!, {r0-r4}
+    msr sp_usr, r0
+    msr lr_usr, r1
+    msr spsr_cxsf, r2
     ldmfd sp!, {r0-r12, pc}^
     
 
@@ -100,6 +109,9 @@ _data_abort:
 
     //go back 
     ldmfd sp!, {r0-r4}
+    msr sp_usr, r0
+    msr lr_usr, r1
+    msr spsr_cxsf, r2
     ldmfd sp!, {r0-r12, pc}^
 
 _not_used:
@@ -118,6 +130,9 @@ _not_used:
 
     //go back 
     ldmfd sp!, {r0-r4}
+    msr sp_usr, r0
+    msr lr_usr, r1
+    msr spsr_cxsf, r2
     ldmfd sp!, {r0-r12, pc}^
 
 
@@ -159,6 +174,9 @@ _fiq:
 
     //go back 
     ldmfd sp!, {r0-r4}
+    msr sp_usr, r0
+    msr lr_usr, r1
+    msr spsr_cxsf, r2
     ldmfd sp!, {r0-r12, pc}^
 
     

@@ -19,8 +19,7 @@ struct tcb{
 };
 
 /*
-runqueue points to thread selected to run
-runqueue->next is the next in the list
+runqueue points to thread selected to run NEXT
 | runqueue
             <- prev
 first     second     third
@@ -31,76 +30,46 @@ struct tcb tcbs[THREAD_COUNT + IDLE_THREAD_COUNT];
 
 struct tcb *runqueue;
 
-struct tcb *running_thread;
+struct tcb *running_thread = NULL;
 
 void change_thread(struct dump_regs* regs, enum THREAD_STATE reason){
-    struct tcb* current_thread = runqueue;
-    struct tcb* next_thread = runqueue->rq_next;
-    //kprintf("next id %u\n", next_thread->id);
-    //kprintf("next state %u\n", next_thread->state);
-    if(next_thread->state != Ready && (reason == Finished || current_thread->state == Finished)){
-        reason = Finished;
-        next_thread = idle_thread();
-        if(running_thread != next_thread){
-            kprintf("goto idle");
-            kprintf("\n");  //per Aufgabe gefordert
-        }
-        running_thread = next_thread;
+    struct tcb* next_thread = next_in_queue();
+
+    if(next_thread->id == THREAD_COUNT && running_thread == next_thread){
+        return;
+        //no change because no new task and old task is not finsihed
     }
-    else if(next_thread->state != Ready && reason != Finished){
-        //kprintf("no change\n");
-        //no change
+    if(reason != Finished && running_thread->id != THREAD_COUNT && next_thread->id == THREAD_COUNT){
         return;
     }
-    else{
-        runqueue = next_thread;
-        if(running_thread != next_thread){
-            kprintf("goto next id: %u", next_thread->id);
-            kprintf("\n");  //per Aufgabe gefordert
-        }
-        if(running_thread->id == THREAD_COUNT){
-            reason = Finished;
-        }
-        running_thread = next_thread;
-    }
-    
+
+    kprintf("\n");
+    //kprintf("next id %u, ", next_thread->id);
+    //kprintf("next state %u, ", next_thread->state);
+    //kprintf("reason: %u, ", reason);
+    //kprintf("running: %u   ", running_thread->id);
+
     //testing only
     if(next_thread->state != Ready){
         kprintf("Error: selected Thread not ready!\n");
     }
 
-    /*struct tcb* pointer = runqueue;
-    for(int i=0; i<32; i++){
-        kprintf("ID: %u\n", pointer->id);
-        kprintf("state: %u\n", pointer->state);
-        pointer = pointer->rq_next;
-    }*/
-
-    /*kprintf("\n\n");
-    kprintf("Old Thread:\n");
-    kprintf("ID: %u\n", current_thread->id);
-    kprintf("State before Change: %u\n", current_thread->state);
-    kprintf("Reason for Change: %u\n", reason);
-    kprintf("New Thread:\n");
-    kprintf("ID: %u\n", next_thread->id);
-    kprintf("State before Change: %u\n", next_thread->state);*/
     
-
-    for(int i=0; i<13; i++){
-        current_thread->r[i] = regs->r[i];
-    }
-    current_thread->lr = regs->lr;
-    current_thread->sp = regs->sp;
-    current_thread->cpsr = regs->spsr;
-    current_thread->pc = regs->pc;
-    current_thread->state = reason;
-    if(reason == Finished){
-        //kprintf("Reset thread id: %u\n", current_thread->id);
-        reset_thread(current_thread);
-    }
-    else{
-        //kprintf("add to queue end\n");
-        add_to_queue_end(current_thread);
+    if(running_thread != NULL){
+        for(int i=0; i<13; i++){
+            running_thread->r[i] = regs->r[i];
+        }
+        running_thread->lr = regs->lr;
+        running_thread->sp = regs->sp;
+        running_thread->cpsr = regs->spsr;
+        running_thread->pc = regs->pc;
+        running_thread->state = reason;
+        if(reason == Finished || running_thread->id == THREAD_COUNT){
+            reset_thread(running_thread);
+        }
+        else{
+            add_to_queue_end(running_thread);
+        }
     }
 
     for(int i=0; i<13; i++){
@@ -112,12 +81,8 @@ void change_thread(struct dump_regs* regs, enum THREAD_STATE reason){
     regs->pc = next_thread->pc;
     next_thread->state = Running;
 
-    /*struct tcb* pointer = runqueue;
-    for(int i=0; i<32; i++){
-        kprintf("ID: %u\n", pointer->id);
-        kprintf("state: %u\n", pointer->state);
-        pointer = pointer->rq_next;
-    }*/
+
+    running_thread = next_thread;
 
 }
 
@@ -126,8 +91,8 @@ struct tcb* idle_thread(){
     tcbs[32].lr = (unsigned int) &create_supervisor_call;
     tcbs[32].cpsr = PCR_USR_IFT;
     tcbs[32].state = Ready;
-    tcbs[32].rq_next = runqueue->rq_next;
-    tcbs[32].rq_prev = runqueue;
+    //tcbs[32].rq_next = runqueue->rq_next;
+    //tcbs[32].rq_prev = runqueue;
 
     return &tcbs[32];
 }
@@ -170,21 +135,10 @@ void thread_create(void (*func)(void *), const void *args, unsigned int args_siz
 }
 
 struct tcb* get_free_thread(){
-    if(runqueue->rq_prev->state != Finished){
-        struct tcb* pointer = runqueue;
-        for(int i=0; i<32; i++){
-            //kprintf("ID: %u\n", pointer->id);
-            //kprintf("state: %u\n", pointer->state);
-            pointer = pointer->rq_next;
-        }
-        /*kprintf("%u\n", runqueue->state);
-        kprintf("%u\n", runqueue->id);
-        kprintf("%u\n", runqueue->rq_prev->state);
-        kprintf("%u\n", runqueue->rq_prev->id);
-        kprintf("%u\n", runqueue->rq_prev->rq_prev->id);*/
+    if(runqueue->rq_prev->rq_prev->state != Finished){
         return NULL;
     }
-    return runqueue->rq_prev;
+    return runqueue->rq_prev->rq_prev;
 }
 
 void init_threads(){
@@ -214,29 +168,67 @@ void add_to_queue_start(struct tcb* thread){
     thread->rq_next->rq_prev = thread->rq_prev;
     thread->rq_prev->rq_next = thread->rq_next;
 
-    thread->rq_prev = runqueue;
-    thread->rq_next = runqueue->rq_next;
-    runqueue->rq_next->rq_prev = thread;
-    runqueue->rq_next = thread;
+    runqueue->rq_prev->rq_next = thread;
+    thread->rq_prev = runqueue->rq_prev;
+    thread->rq_next = runqueue;
+    runqueue->rq_prev = thread;
+
+    runqueue = thread;
+
+    /*kprintf("add to queue start\n");
+    struct tcb* pointer = runqueue;
+    for(int i=0; i<32; i++){
+        kprintf("ID: %u\n", pointer->id);
+        kprintf("state: %u\n", pointer->state);
+        pointer = pointer->rq_next;
+    }*/
 }
 
 void add_to_queue_end(struct tcb* thread){
-    struct tcb* queue_end = runqueue->rq_prev->rq_prev;
+    struct tcb* queue_end = thread->rq_prev;
     while(queue_end->state == Finished && queue_end != runqueue){
         queue_end = queue_end->rq_prev;
     }
-
-    if(queue_end == thread){
-        return;
-    }
+    //kprintf("queue end: %u\n", queue_end->id);
+    //kprintf("runqueue: %u\n", runqueue->id);
+    //kprintf("thread prev: %u\n", thread->rq_prev->id);
 
     thread->rq_next->rq_prev = thread->rq_prev;
     thread->rq_prev->rq_next = thread->rq_next;
-    thread->rq_next = queue_end->rq_next;
-    thread->rq_prev = queue_end;
+
+    if(queue_end == runqueue){
+        //kprintf("same\n");
+        runqueue->rq_prev->rq_next = thread;
+        thread->rq_prev = runqueue->rq_prev;
+        thread->rq_next = runqueue;
+        runqueue->rq_prev = thread;
+
+        runqueue = thread;
+    }
+    else{
+        thread->rq_next = queue_end->rq_next;
+        thread->rq_prev = queue_end;
     
-    queue_end->rq_next->rq_prev = thread;
-    queue_end->rq_next = thread;
+        queue_end->rq_next->rq_prev = thread;
+        queue_end->rq_next = thread;
+    }
+
+    /*struct tcb* pointer = runqueue;
+    for(int i=0; i<32; i++){
+        kprintf("ID: %u\n", pointer->id);
+        kprintf("state: %u\n", pointer->state);
+        pointer = pointer->rq_next;
+    }*/
+    
+    
+}
+
+struct tcb* next_in_queue(){
+    if(runqueue->state != Ready){
+        return idle_thread();
+    }
+    runqueue = runqueue->rq_next;
+    return runqueue->rq_prev;
 }
 
 
@@ -246,7 +238,7 @@ void reset_thread(struct tcb* thread){
     thread->sp = (THREAD_SP_BASE + THREAD_SP_SIZE * thread->id);
 }
 
-struct tcb* current_thread(){
+/*struct tcb* current_thread(){
     return runqueue;
-}
+}*/
 
