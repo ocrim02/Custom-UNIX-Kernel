@@ -4,6 +4,8 @@
 #include <arch/cpu/cpu.h>
 #include <arch/cpu/interrupt.h>
 #include <arch/cpu/kernel_access.h>
+#include <kernel/thread.h>
+#include <user/main.h>
 
 enum EXCEPTION_MODE{
 	EX_UND   = 1, // Undefined Instruction
@@ -29,19 +31,7 @@ struct dump_regs{
     unsigned int spsr;
     unsigned int sr;
     unsigned int ar;
-    unsigned int r0;
-    unsigned int r1;
-    unsigned int r2;
-    unsigned int r3;
-    unsigned int r4;
-    unsigned int r5;
-    unsigned int r6;
-    unsigned int r7;
-    unsigned int r8;
-    unsigned int r9;
-    unsigned int r10;
-    unsigned int r11;
-    unsigned int r12; 
+    unsigned int r[13];
     unsigned int pc;
     
 };

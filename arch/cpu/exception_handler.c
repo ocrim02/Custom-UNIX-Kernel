@@ -36,21 +36,44 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
         case EX_UND:
             kprintf("Undefined Instruction\n");
             reg_dump(mode, regs);
-            stop();
+            if(read_masked(regs->spsr, 4, 0) == USR_MODE){
+                kprintf("Thread ran into unresolvable Error... Thread reset.\n");
+                change_thread(regs, Finished);
+            }
+            else{
+                stop();
+            }
             break;
         case EX_SVC:
-            kprintf("Supervisor Call\n");
-            reg_dump(mode, regs);
-            stop();
+            if(read_masked(regs->spsr, 4, 0) == USR_MODE){
+                change_thread(regs, Finished);
+            }
+            else{
+                kprintf("Supervisor Call\n");
+                reg_dump(mode, regs);
+                stop();
+            }
             break;
         case EX_PFABT:
             kprintf("Prefetch Abort\n");
             reg_dump(mode, regs);
-            stop();
+            if(read_masked(regs->spsr, 4, 0) == USR_MODE){
+                kprintf("Thread ran into unresolvable Error... Thread reset.\n");
+                change_thread(regs, Finished);
+            }
+            else{
+                stop();
+            }
             break;
         case EX_DABT:
             reg_dump(mode, regs);
-            stop();
+            if(read_masked(regs->spsr, 4, 0) == USR_MODE){
+                kprintf("Thread ran into unresolvable Error... Thread reset.\n");
+                change_thread(regs, Finished);
+            }
+            else{
+                stop();
+            }
             break;
         case EX_IRQ:
             if(irq_regdump){
@@ -59,14 +82,35 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             switch(get_irq_source()){
                 case SYS_TIMER_2:
                     if(character_loop_mode == 1){
-                        kprintf("!\n");
-
+                        kprintf("!");
                     }
+                    change_thread(regs, Ready);
                     increment_compare(TIMER_INTERVAL, C1);
                     ack_timer_interrupt(C1);
                     break;
                 case UART:
                     put_ring_buffer(read_uart());
+                    const char input = pop_ring_buffer();
+
+                    switch(input){
+                        case 'S':
+                            create_supervisor_call();
+                            break;
+                        case 'P':
+                            create_prefetch_abort();
+                            break;
+                        case 'A':
+                            create_data_abort();
+                            break;
+                        case 'U':
+                            create_undefined_instruction();
+                            break;
+                        default:
+                            thread_create(&main, &input, 1); 
+                            change_thread(regs, Ready);
+                            break;
+                    }
+                    
                     break;
             }
             break;
@@ -161,11 +205,11 @@ void reg_dump(enum EXCEPTION_MODE mode, struct dump_regs * regs){
 
     kprintf("\n");
     kprintf(">> Registerschnappschuss <<\n");
-    kprintf("R0: 0x%08x  R5: 0x%08x  R10: 0x%08x\n", regs->r0, regs->r5, regs->r10);
-    kprintf("R1: 0x%08x  R6: 0x%08x  R11: 0x%08x\n", regs->r1, regs->r6, regs->r11);
-    kprintf("R2: 0x%08x  R7: 0x%08x  R12: 0x%08x\n", regs->r2, regs->r7, regs->r12);
-    kprintf("R3: 0x%08x  R8: 0x%08x\n", regs->r3, regs->r8);
-    kprintf("R4: 0x%08x  R9: 0x%08x\n", regs->r4, regs->r9);
+    kprintf("R0: 0x%08x  R5: 0x%08x  R10: 0x%08x\n", regs->r[0], regs->r[5], regs->r[10]);
+    kprintf("R1: 0x%08x  R6: 0x%08x  R11: 0x%08x\n", regs->r[1], regs->r[6], regs->r[11]);
+    kprintf("R2: 0x%08x  R7: 0x%08x  R12: 0x%08x\n", regs->r[2], regs->r[7], regs->r[12]);
+    kprintf("R3: 0x%08x  R8: 0x%08x\n", regs->r[3], regs->r[8]);
+    kprintf("R4: 0x%08x  R9: 0x%08x\n", regs->r[4], regs->r[9]);
     kprintf("\n");
 
 
