@@ -46,7 +46,42 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             break;
         case EX_SVC:
             if(read_masked(regs->spsr, 4, 0) == USR_MODE){
-                change_thread(regs, Finished);
+                char c;
+                switch(regs->r[0]){
+                    case GETC:
+                        c = pop_ring_buffer();
+                        if(c == 0){
+                            set_uart_sleep();
+                            change_thread(regs, Waiting);
+                            
+                        }
+                        else{
+                            regs->r[0] = (unsigned int) c;
+                            regs->pc = regs->pc + 4;
+                        }
+                        break;
+                    case PUTC:
+                        write_uart(regs->r[1]);
+                        regs->pc = regs->pc + 4;
+                        break;
+                    case EXIT:
+                        change_thread(regs, Finished);
+                        break;
+                    case SLEEP:
+                        set_timer_sleep(regs->r[1]);
+                        regs->pc = regs->pc + 4;
+                        change_thread(regs, Waiting);
+                        break;
+                    case THREAD_CREATE:
+                        thread_create((void*) regs->r[1], (void*) regs->r[2], regs->r[3]); 
+                        regs->pc = regs->pc + 4;
+                        break;
+                }
+
+                //void* func[5] = {&pop_ring_buffer, &write_uart, &change_thread, &sleep, &thread_create};
+                //arg_helper(regs->r[1], regs->r[2], regs->r[3]);
+
+                //change_thread(regs, Finished);
             }
             else{
                 kprintf("Supervisor Call\n");
@@ -84,13 +119,15 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                     if(character_loop_mode == 1){
                         kprintf("!");
                     }
+                    timer_update();
                     change_thread(regs, Ready);
                     increment_compare(TIMER_INTERVAL, C1);
                     ack_timer_interrupt(C1);
                     break;
                 case UART:
                     put_ring_buffer(read_uart());
-                    const char input = pop_ring_buffer();
+                    uart_wake();
+                    /*const char input = pop_ring_buffer();
 
                     switch(input){
                         case 'S':
@@ -109,7 +146,7 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                             thread_create(&main, &input, 1); 
                             change_thread(regs, Ready);
                             break;
-                    }
+                    }*/
                     
                     break;
             }
