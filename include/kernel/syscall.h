@@ -5,12 +5,12 @@
 #include <stdbool.h>
 
 
-char syscall_getc() __attribute__((weak));
-void syscall_putc(char) __attribute__((weak));
-void syscall_sleep(unsigned int) __attribute__((weak));
-void syscall_exit() __attribute__((weak)); 
-bool syscall_thread_create(void (*func)(void *), const void*, unsigned int) __attribute__((weak));
-void undef_syscall() __attribute__((weak));
+char syscall_getc();
+void syscall_putc(char);
+void syscall_sleep(unsigned int);
+void syscall_exit()__attribute__((weak)); 
+bool syscall_thread_create(void (*func)(void *), const void*, unsigned int);
+void undef_syscall();
 
 
 
