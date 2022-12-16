@@ -32,7 +32,6 @@ void start_kernel(){
 	init_threads();
 	set_ivt();
 	interrupt_setup();
-	//switch_loop_mode();
 	increment_compare(TIMER_INTERVAL, C1);
 	setup_int_uart();
 

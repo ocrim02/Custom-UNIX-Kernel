@@ -19,7 +19,7 @@ void worker_thread(void* arg){
 			syscall_sleep(2);
 		}
 	}
-	//syscall_exit();
+	syscall_exit();
 }
 
 void main(){
