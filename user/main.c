@@ -13,13 +13,13 @@ void worker_thread(void* arg){
 		syscall_putc(c);
 
 		if( c >= 'A' && c <= 'Z'){
-			for(unsigned int a=0; a<BUSY_WAIT_COUNTER; a++){}
+			for(unsigned int a=0; a<BUSY_WAIT_COUNTER*40; a++){}
 		}
 		else{
 			syscall_sleep(2);
 		}
 	}
-	syscall_exit();
+	//syscall_exit();
 }
 
 void main(){

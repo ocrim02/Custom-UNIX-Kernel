@@ -22,7 +22,7 @@ typedef struct dump_regs dump_regs;
 
 
 void change_thread(struct dump_regs*, enum THREAD_STATE);
-void thread_create(void (*func)(void *), const void*, unsigned int);
+bool thread_create(void (*func)(void *), const void*, unsigned int);
 struct tcb* get_free_thread();
 void init_threads();
 void add_to_queue_start(struct tcb*);

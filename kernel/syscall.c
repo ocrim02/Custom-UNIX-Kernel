@@ -14,11 +14,14 @@ void syscall_exit(){
 }
 
 void syscall_sleep(unsigned int duration){
+    if(duration == 0){
+        return;
+    }
     create_supervisor_call(SLEEP, duration, 0, 0);
 }
 
-void syscall_thread_create(void (*func)(void *), const void* args, unsigned int arg_size){
-    create_supervisor_call(THREAD_CREATE, (unsigned int) func, (unsigned int) args, arg_size);
+bool syscall_thread_create(void (*func)(void *), const void* args, unsigned int arg_size){
+    return (bool) create_supervisor_call(THREAD_CREATE, (unsigned int) func, (unsigned int) args, arg_size);
 }
 
 void undef_syscall(){
