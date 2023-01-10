@@ -1,33 +1,30 @@
 #include <user/main.h>
 
-#define PRINT_COUNT 20
+#define PRINT_COUNT 11
 
-void main(void* args){
-	char c = *((char*) args);
+void worker_thread(void* arg){
+	char c = *((char *) arg);
 
-	switch(c){
-		case 'a':
-			create_data_abort();
-			return;
-		case 'p':
-			create_prefetch_abort();
-			return;
-		case 'u':
-			create_undefined_instruction();
-			return;
-		case 's':
-			create_supervisor_call();
-			return;
-		case 'r':
-			register_checker();
-			return;
+	if(c == 's'){
+		undef_syscall();
 	}
 
-	for(unsigned int n=0; n<PRINT_COUNT; n++){
-		volatile unsigned int i = 0;
-		for(; i<(BUSY_WAIT_COUNTER); i++){}
-		kprintf("%c", c);
-	}
+	for(unsigned int i=0; i<PRINT_COUNT; i++){
+		syscall_putc(c);
 
-	return;
+		if( c >= 'A' && c <= 'Z'){
+			for(unsigned int a=0; a<BUSY_WAIT_COUNTER*40; a++){}
+		}
+		else{
+			syscall_sleep(2);
+		}
+	}
+	syscall_exit();
+}
+
+void main(){
+	for(;;){
+		char c = syscall_getc();
+		syscall_thread_create(worker_thread, &c, sizeof(c));
+	}
 }

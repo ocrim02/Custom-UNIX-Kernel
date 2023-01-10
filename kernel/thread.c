@@ -16,6 +16,8 @@ struct tcb{
     unsigned int id;
     struct tcb *rq_next;
     struct tcb *rq_prev;
+    enum WAITING_FOR waiting_reason;
+    unsigned int timer_intervals;
 };
 
 struct tcb tcbs[THREAD_COUNT + IDLE_THREAD_COUNT];
@@ -33,17 +35,16 @@ void change_thread(struct dump_regs* regs, enum THREAD_STATE reason){
 
     if(next_thread->id == THREAD_COUNT && running_thread == next_thread){
         return;
-        //no change due to no new task and old task is not finsihed
+        //continue in idle
     }
-    if(reason != Finished && running_thread->id != THREAD_COUNT && next_thread->id == THREAD_COUNT){
+    if(reason != Finished && reason != Waiting && running_thread->id != THREAD_COUNT && next_thread->id == THREAD_COUNT){
         return;
+        //no change due to no new task and old task is not finsihed
     }
     if(next_thread->state != Ready){
         kprintf("Error: selected Thread not ready!\n");
         return;
     }
-
-    kprintf("\n");
     
     if(running_thread != NULL){
         for(int i=0; i<13; i++){
@@ -57,8 +58,11 @@ void change_thread(struct dump_regs* regs, enum THREAD_STATE reason){
         if(reason == Finished || running_thread->id == THREAD_COUNT){
             reset_thread(running_thread);
         }
+        else if(reason == Waiting){
+            add_to_queue_end(running_thread, true);
+        }
         else{
-            add_to_queue_end(running_thread);
+            add_to_queue_end(running_thread, false);
         }
     }
 
@@ -71,28 +75,29 @@ void change_thread(struct dump_regs* regs, enum THREAD_STATE reason){
     regs->pc = next_thread->pc;
     next_thread->state = Running;
 
-
     running_thread = next_thread;
 
 }
+
 
 /*
 * returns a thread that waits for an interrupt
 */
 struct tcb* idle_thread(){
-    tcbs[32].pc = (unsigned int) &wait_for_int;
-    tcbs[32].lr = (unsigned int) &create_supervisor_call;
-    tcbs[32].cpsr = PCR_USR_IFT;
-    tcbs[32].state = Ready;
+    tcbs[THREAD_COUNT].pc = (unsigned int) &wait_for_int;
+    tcbs[THREAD_COUNT].lr = (unsigned int) &syscall_exit;
+    tcbs[THREAD_COUNT].cpsr = PCR_USR_IFT;
+    tcbs[THREAD_COUNT].state = Ready;
 
-    return &tcbs[32];
+    return &tcbs[THREAD_COUNT];
 }
 
-void thread_create(void (*func)(void *), const void *args, unsigned int args_size){
+
+bool thread_create(void (*func)(void *), const void *args, unsigned int args_size){
     struct tcb *free_thread = get_free_thread();
     if(free_thread == NULL){
-        kprintf("No free thread available\n");
-        return;
+        //No free thread available
+        return false;
     }
 
     for(unsigned int i=args_size; i>0; i--){
@@ -103,15 +108,16 @@ void thread_create(void (*func)(void *), const void *args, unsigned int args_siz
     free_thread->sp = free_thread->sp + args_size;
 
     free_thread->pc = (unsigned int) func;
-    free_thread->lr = (unsigned int) &create_supervisor_call;
+    free_thread->lr = (unsigned int) &syscall_exit;
     free_thread->cpsr = PCR_USR_IFT;
     free_thread->r[0] = free_thread->sp;
     free_thread->r[1] = args_size;
     free_thread->state = Ready;
 
     add_to_queue_start(free_thread);
-
+    return true;
 }
+
 
 struct tcb* get_free_thread(){
     if(runqueue->rq_prev->rq_prev->state != Finished){
@@ -120,6 +126,7 @@ struct tcb* get_free_thread(){
     return runqueue->rq_prev->rq_prev;
 }
 
+
 void init_threads(){
     for(int i=0; i<(THREAD_COUNT); i++){
         tcbs[i].rq_next = &tcbs[(i+1)%THREAD_COUNT];
@@ -127,6 +134,8 @@ void init_threads(){
         tcbs[i].state = Finished;
         tcbs[i].id = i;
         tcbs[i].sp = (THREAD_SP_BASE - THREAD_SP_SIZE * i);
+        tcbs[i].timer_intervals = 0;
+        tcbs[i].waiting_reason = 0;
     }
     runqueue = &tcbs[0];
 
@@ -137,12 +146,13 @@ void init_threads(){
     tcbs[THREAD_COUNT].sp = (THREAD_SP_BASE - THREAD_SP_SIZE * THREAD_COUNT);
 }
 
+
 /*
 * makes given thread the next in the queue
 */
 void add_to_queue_start(struct tcb* thread){
     if(thread == runqueue){
-        kprintf("Error\n");
+        kprintf("Error 1\n");
         return;
     }
 
@@ -157,15 +167,23 @@ void add_to_queue_start(struct tcb* thread){
     runqueue = thread;
 }
 
+
 /*
 * adds given thread to the end of the queue elements that are not Finished yet
 */
-void add_to_queue_end(struct tcb* thread){
+void add_to_queue_end(struct tcb* thread, bool waiting_end){
     struct tcb* queue_end = thread->rq_prev;
-    while(queue_end->state == Finished && queue_end != runqueue){
-        queue_end = queue_end->rq_prev;
+    if(waiting_end){
+        while((queue_end->state == Finished || queue_end->state == Ready) && queue_end != runqueue){
+            queue_end = queue_end->rq_prev;
+        }
     }
-
+    else{
+        while(queue_end->state == Finished && queue_end != runqueue){
+            queue_end = queue_end->rq_prev;
+        }
+    }
+    
     thread->rq_next->rq_prev = thread->rq_prev;
     thread->rq_prev->rq_next = thread->rq_next;
 
@@ -184,15 +202,24 @@ void add_to_queue_end(struct tcb* thread){
         queue_end->rq_next->rq_prev = thread;
         queue_end->rq_next = thread;
     }
-    
+
 }
 
+
 struct tcb* next_in_queue(){
-    if(runqueue->state != Ready){
+    struct tcb* start = runqueue;
+    while(start->state == Waiting){
+        start = start->rq_next;
+    }
+    if(start->state != Ready){
         return idle_thread();
     }
-    runqueue = runqueue->rq_next;
-    return runqueue->rq_prev;
+
+    if(start != runqueue){
+        add_to_queue_start(start);
+    }
+    runqueue = start->rq_next;
+    return start;
 }
 
 
@@ -200,4 +227,51 @@ void reset_thread(struct tcb* thread){
     thread->state = Finished;
     thread->sp = (THREAD_SP_BASE + THREAD_SP_SIZE * thread->id);
 }
+
+
+/*
+* the first thread in the queue waiting for uart input is set to Ready state
+*/
+void uart_wake(){
+    struct tcb* pointer = runqueue;
+    int counter = 0;
+    while(pointer->state == Waiting && pointer->waiting_reason != Uart && counter < THREAD_COUNT){
+        pointer = pointer->rq_next;
+        counter++;
+    }
+    if(pointer->state == Waiting && pointer->waiting_reason == Uart){
+        pointer->state = Ready;
+    }
+    
+}
+
+/*
+* time left to wait for all timer waiting threads is reduced by 1 interval
+* if interval is 0 afterwars thread state is set to Ready
+*/
+void timer_update(){
+    struct tcb* pointer = runqueue;
+    int counter = 0;
+    while(pointer->state == Waiting && counter < THREAD_COUNT){
+        if(pointer->waiting_reason == Timer){
+            pointer->timer_intervals = pointer->timer_intervals - 1;
+            if(pointer->timer_intervals == 0){
+                pointer->state = Ready;
+            }
+        }
+        pointer = pointer->rq_next;
+        counter++;
+    }
+}
+
+void set_uart_sleep(){
+    runqueue->rq_prev->waiting_reason = Uart;
+}
+
+void set_timer_sleep(unsigned int intervals){
+    runqueue->rq_prev->waiting_reason = Timer;
+    runqueue->rq_prev->timer_intervals = intervals;
+}
+
+
 

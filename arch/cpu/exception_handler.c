@@ -34,7 +34,6 @@ void switch_loop_mode(){
 void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
     switch(mode){
         case EX_UND:
-            kprintf("Undefined Instruction\n");
             reg_dump(mode, regs);
             if(read_masked(regs->spsr, 4, 0) == USR_MODE){
                 kprintf("Thread ran into unresolvable Error... Thread reset.\n");
@@ -46,16 +45,23 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             break;
         case EX_SVC:
             if(read_masked(regs->spsr, 4, 0) == USR_MODE){
-                change_thread(regs, Finished);
+                void (*func[5]) (struct dump_regs*)= {&getc_routine, &putc_routine, &exit_routine, &sleep_routine, &thread_create_routine};
+                if(regs->r[0] > 4){
+                    reg_dump(mode, regs);
+                    kprintf("Invalid syscall. Exit thread...\n");
+                    change_thread(regs, Finished);
+                }
+                else{
+                    func[regs->r[0]] (regs);
+                }
+
             }
             else{
-                kprintf("Supervisor Call\n");
                 reg_dump(mode, regs);
                 stop();
             }
             break;
         case EX_PFABT:
-            kprintf("Prefetch Abort\n");
             reg_dump(mode, regs);
             if(read_masked(regs->spsr, 4, 0) == USR_MODE){
                 kprintf("Thread ran into unresolvable Error... Thread reset.\n");
@@ -79,38 +85,24 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             if(irq_regdump){
                 reg_dump(mode, regs);
             }
+            char input;
             switch(get_irq_source()){
                 case SYS_TIMER_2:
                     if(character_loop_mode == 1){
                         kprintf("!");
                     }
+                    timer_update();
                     change_thread(regs, Ready);
                     increment_compare(TIMER_INTERVAL, C1);
                     ack_timer_interrupt(C1);
                     break;
                 case UART:
-                    put_ring_buffer(read_uart());
-                    const char input = pop_ring_buffer();
-
-                    switch(input){
-                        case 'S':
-                            create_supervisor_call();
-                            break;
-                        case 'P':
-                            create_prefetch_abort();
-                            break;
-                        case 'A':
-                            create_data_abort();
-                            break;
-                        case 'U':
-                            create_undefined_instruction();
-                            break;
-                        default:
-                            thread_create(&main, &input, 1); 
-                            change_thread(regs, Ready);
-                            break;
+                    input = read_uart();
+                    if(input == 'S'){
+                        syscall_exit();
                     }
-                    
+                    put_ring_buffer(input);
+                    uart_wake();
                     break;
             }
             break;
