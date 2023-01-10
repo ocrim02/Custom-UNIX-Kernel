@@ -45,10 +45,10 @@
 BIN_LSG = 
 
 # Hier eure source files hinzufügen
-SRC = kernel/syscall.c arch/cpu/syscall_routines.c kernel/thread.c arch/cpu/exception_creator.S arch/cpu/kernel_access.S arch/cpu/exception_handler.c arch/cpu/entry.S arch/cpu/ivt.S arch/cpu/interrupt.c kernel/start.c arch/bsp/yellow_led.c lib/utils.c arch/bsp/pl011_uart.c arch/bsp/timer.c tests/regcheck.c tests/regcheck_asm.S
+SRC = arch/cpu/syscall_routines.c kernel/thread.c arch/cpu/exception_creator.S arch/cpu/kernel_access.S arch/cpu/exception_handler.c arch/cpu/entry.S arch/cpu/ivt.S arch/cpu/interrupt.c kernel/start.c arch/bsp/yellow_led.c lib/utils.c arch/bsp/pl011_uart.c arch/bsp/timer.c tests/regcheck.c tests/regcheck_asm.S
 
 # Hier separate user source files hinzufügen
-USRC = user/main.c
+USRC = user/main.c kernel/syscall.c
 
 # Hier können eigene GCC flags mit angegeben werden.
 # Die vorgegebenen Flags können weiter unten gefunden werden unter

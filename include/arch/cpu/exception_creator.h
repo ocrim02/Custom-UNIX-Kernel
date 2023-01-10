@@ -10,7 +10,7 @@ enum call_type{
 };
 
 void create_prefetch_abort();
-unsigned int create_supervisor_call(enum call_type, unsigned int, unsigned int, unsigned int);
+unsigned int create_supervisor_call(enum call_type, unsigned int, unsigned int, unsigned int)__attribute__((weak));
 void create_undefined_instruction();
 void create_data_abort();
 void wait_for_int();
