@@ -19,6 +19,7 @@
 #include <tests/regcheck.h>
 #include <arch/cpu/exception_creator.h>
 #include <kernel/thread.h>
+#include <arch/cpu/mmu.h>
 
 volatile unsigned int counter = 0;
 
@@ -34,6 +35,11 @@ void start_kernel(){
 	interrupt_setup();
 	increment_compare(TIMER_INTERVAL, C1);
 	setup_int_uart();
+	kprintf("start mpu...\n");
+	void* l1_table = l1_table_init();
+	clear_tlb();
+	mmu_init(l1_table);
+	kprintf("startup done.\n");
 
 	thread_create(&main, 0, 0);
 

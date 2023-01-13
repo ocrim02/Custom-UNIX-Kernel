@@ -6,6 +6,11 @@
 #include <arch/cpu/exception_creator.h>
 #include <kernel/syscall.h>
 
+#define PCR_USR_IFT 16
+#define IDLE_THREAD_COUNT 1
+#define THREAD_COUNT 32
+#define NULL 0
+
 enum THREAD_STATE{
     Ready = 0,
     Running = 1,
