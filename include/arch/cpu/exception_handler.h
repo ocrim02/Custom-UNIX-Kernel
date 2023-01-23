@@ -8,6 +8,7 @@
 #include <user/main.h>
 #include <arch/cpu/exception_creator.h>
 #include <arch/cpu/syscall_routines.h>
+#include <arch/cpu/mmu.h>
 
 enum EXCEPTION_MODE{
 	EX_UND   = 1, // Undefined Instruction

@@ -4,7 +4,8 @@
 #include <arch/cpu/cpu.h>
 #include <arch/cpu/exception_handler.h>
 #include <arch/cpu/exception_creator.h>
-#include <kernel/syscall.h>
+#include <user/syscall.h>
+#include <user/exceptions.h>
 
 #define PCR_USR_IFT 16
 #define IDLE_THREAD_COUNT 1

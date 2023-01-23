@@ -40,7 +40,7 @@ _enableAlignCheck:
 _bsprak:
 	/* Validen Stack Pointer setzten */
 	
-	ldr sp,=0x100000
+	//ldr sp,=0x100000
 
 	cps #IRQ_MODE
 	ldr sp, =IRQ_SP

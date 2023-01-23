@@ -5,8 +5,39 @@
 void worker_thread(void* arg){
 	char c = *((char *) arg);
 
-	if(c == 's'){
-		undef_syscall();
+	switch (c){
+	case 'n':
+		//read null
+		break;
+	case 'p':
+		//jump null
+		break;
+	case 'd':
+		//read kernel_data
+		break;
+	case 'k':
+		//read kernel_code
+		break;
+	case 'K':
+		//read kernel_stack
+		break;
+	case 'g':
+		//read uart
+		break;
+	case 'c':
+		//write own code
+		break;
+	case 's':
+		//stack-overflow
+		break;
+	case 'u':
+		//read unassigned addr
+		break;
+	case 'x':
+		//jump own data
+		break;
+	default:
+		break;
 	}
 
 	for(unsigned int i=0; i<PRINT_COUNT; i++){

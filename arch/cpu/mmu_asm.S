@@ -13,7 +13,8 @@ mmu_init:
     //TTB Control Reg
     mrc p15, 0, r1, c2, c0, 2
 	//change r0
-    and r1, #0x7FFFFFFF
+    mov r1, #0
+    //and r1, #0x7FFFFFFF
 	mcr p15, 0, r1, c2, c0, 2
 
     //sctlr

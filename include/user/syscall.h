@@ -1,7 +1,7 @@
 #ifndef _SYSCALL_H_
 #define _SYSCALL_H_
 
-#include <arch/cpu/exception_creator.h>
+#include <user/exceptions.h>
 #include <stdbool.h>
 
 

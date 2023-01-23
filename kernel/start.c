@@ -16,7 +16,7 @@
 #include <arch/cpu/interrupt.h>
 #include <arch/bsp/timer.h>
 #include <arch/cpu/ivt.h>
-#include <tests/regcheck.h>
+//#include <tests/regcheck.h>
 #include <arch/cpu/exception_creator.h>
 #include <kernel/thread.h>
 #include <arch/cpu/mmu.h>
@@ -39,6 +39,7 @@ void start_kernel(){
 	void* l1_table = l1_table_init();
 	clear_tlb();
 	mmu_init(l1_table);
+	clear_tlb();
 	kprintf("startup done.\n");
 
 	thread_create(&main, 0, 0);

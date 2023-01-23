@@ -6,6 +6,28 @@
 #include <kernel/thread.h>
 #include <arch/cpu/cpu.h>
 
+#ifndef __LDS__
+extern unsigned int kernel_text_section[];
+extern unsigned int kernel_rodata_section[];
+extern unsigned int kernel_data_section[];
+extern unsigned int kernel_bss_section[];
+extern unsigned int user_text_section[];
+extern unsigned int user_rodata_section[];
+extern unsigned int user_data_section[];
+extern unsigned int user_bss_section[];
+
+extern unsigned int kernel_text_size[];
+extern unsigned int kernel_rodata_size[];
+extern unsigned int kernel_data_size[];
+extern unsigned int kernel_bss_size[];
+extern unsigned int user_text_size[];
+extern unsigned int user_rodata_size[];
+extern unsigned int user_data_size[];
+extern unsigned int user_bss_size[];
+#endif
+
+#define ONE_MB (1024*1024)
+
 
 enum mmu_permission {
 	PERM_NO_ACCESS         = 0b000,

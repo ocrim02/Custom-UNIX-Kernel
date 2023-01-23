@@ -2,7 +2,7 @@
 #define _MAIN_H_
 
 //#include <arch/cpu/exception_creator.h>
-#include <kernel/syscall.h>
+#include <user/syscall.h>
 #include <config.h>
 
 void main() __attribute__((weak));
