@@ -16,11 +16,11 @@ void worker_thread(void* arg){
 		break;
 	case 'd':
 		//read kernel_data
-		read_addr(kernel_data_section);
+		read_addr((unsigned int) kernel_data_section);
 		break;
 	case 'k':
 		//read kernel_code
-		read_addr(kernel_text_section);
+		read_addr((unsigned int) kernel_text_section);
 		break;
 	case 'K':
 		//read kernel_stack
@@ -40,11 +40,11 @@ void worker_thread(void* arg){
 		break;
 	case 'u':
 		//read unassigned addr
-		read_addr(user_bss_section + ONE_MB);
+		read_addr((unsigned int) user_bss_section + ONE_MB);
 		break;
 	case 'x':
 		//jump own data
-		jump_addr(user_data_section);
+		jump_addr((unsigned int) user_data_section);
 		break;
 	default:
 		break;

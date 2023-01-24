@@ -6,7 +6,6 @@
 #include <arch/cpu/kernel_access.h>
 #include <kernel/thread.h>
 #include <user/main.h>
-#include <arch/cpu/exception_creator.h>
 #include <arch/cpu/syscall_routines.h>
 #include <arch/cpu/mmu.h>
 

@@ -3,7 +3,6 @@
 
 #include <arch/cpu/cpu.h>
 #include <arch/cpu/exception_handler.h>
-#include <arch/cpu/exception_creator.h>
 #include <user/syscall.h>
 #include <user/exceptions.h>
 
