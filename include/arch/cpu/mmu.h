@@ -39,13 +39,13 @@ enum mmu_permission {
 };
 
 
-void mmu_l1_section(void * virt_addr, void * phy_addr, enum mmu_permission perm);
+void mmu_l1_section(void * virt_addr, void * phy_addr, enum mmu_permission perm, bool pxn, bool xn);
 void* l1_table_init();
 void mmu_init(void* l1_base);
 void clear_tlb();
 void tcb_sp_init();
-void mmu_l1_l2(void * virt_addr, void * l2_base_addr);
-void mmu_l2_small(void * virt_addr, void * phy_addr, uint32_t l2_table[256], enum mmu_permission perm);
+void mmu_l1_l2(void * virt_addr, void * l2_base_addr, bool pxn);
+void mmu_l2_small(void * virt_addr, void * phy_addr, uint32_t l2_table[256], enum mmu_permission perm, bool xn);
 void mmu_l2_fault(void * virt_addr, uint32_t l2_table[256]);
 void mmu_l1_fault(void * virt_addr);
 

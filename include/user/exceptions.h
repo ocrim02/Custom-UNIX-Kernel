@@ -17,5 +17,6 @@ void wait_for_int();
 void read_addr(unsigned int);
 void write_addr(unsigned int);
 void jump_addr(unsigned int);
+void stack_overflow();
 
 #endif

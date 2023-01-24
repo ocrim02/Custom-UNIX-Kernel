@@ -31,10 +31,16 @@ read_addr:
 
 .global write_addr
 write_addr:
-    mov r0, #0
+    str r0, [r0]
     mov pc, lr
 
 .global jump_addr
 jump_addr:
     bx r0
+    mov pc, lr
+
+.global stack_overflow
+stack_overflow:
+    stmfd sp!, {r0-r12, lr}
+    b stack_overflow
     mov pc, lr

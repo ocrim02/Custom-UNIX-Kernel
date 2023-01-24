@@ -12,7 +12,7 @@
 #define SVC_SP (MAX_RAM_ADDR - (SP_SIZE * 4))
 
 #define THREAD_SP_SIZE (1024 * 1024)
-#define THREAD_SP_BASE (MAX_RAM_ADDR - (1024 * 1024))
+#define THREAD_SP_BASE (MAX_RAM_ADDR - (1024 * 1024) - 4)
 
 #define USR_MODE (0x10)
 #define FIQ_MODE (0x11)

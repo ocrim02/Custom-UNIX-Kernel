@@ -96,6 +96,7 @@ bool thread_create(void (*func)(void *), const void *args, unsigned int args_siz
     }
 
     for(unsigned int i=args_size; i>0; i--){
+        kprintf("access to %x\n", free_thread->sp);
         *((char*) free_thread->sp) = *((char*) args);
         free_thread->sp = free_thread->sp - 1;
         args = args + 1;
