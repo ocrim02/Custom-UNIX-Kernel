@@ -1,5 +1,3 @@
-
-
 .global create_prefetch_abort
 create_prefetch_abort:
     bkpt #1
@@ -20,8 +18,29 @@ create_data_abort:
     mov r0, #0x01
     ldr r1, [r0]
     mov pc, lr
-
+    
 .global wait_for_int
 wait_for_int:
     wfi
+    mov pc, lr
+
+.global read_addr
+read_addr:
+    ldr r1, [r0]
+    mov pc, lr
+
+.global write_addr
+write_addr:
+    str r0, [r0]
+    mov pc, lr
+
+.global jump_addr
+jump_addr:
+    bx r0
+    mov pc, lr
+
+.global stack_overflow
+stack_overflow:
+    stmfd sp!, {r0-r12, lr}
+    b stack_overflow
     mov pc, lr

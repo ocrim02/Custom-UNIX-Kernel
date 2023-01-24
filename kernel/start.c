@@ -16,9 +16,8 @@
 #include <arch/cpu/interrupt.h>
 #include <arch/bsp/timer.h>
 #include <arch/cpu/ivt.h>
-#include <tests/regcheck.h>
-#include <arch/cpu/exception_creator.h>
 #include <kernel/thread.h>
+#include <arch/cpu/mmu.h>
 
 volatile unsigned int counter = 0;
 
@@ -34,6 +33,9 @@ void start_kernel(){
 	interrupt_setup();
 	increment_compare(TIMER_INTERVAL, C1);
 	setup_int_uart();
+	void* l1_table = l1_table_init();
+	mmu_init(l1_table);
+	clear_tlb();
 
 	thread_create(&main, 0, 0);
 

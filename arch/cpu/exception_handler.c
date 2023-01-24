@@ -98,9 +98,31 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                     break;
                 case UART:
                     input = read_uart();
-                    if(input == 'S'){
-                        syscall_exit();
+                    switch (input){
+                        case 'N':
+                            //read NULL
+                            read_addr(0);
+                            break;
+                        case 'P':
+                            //Jump Null
+                            jump_addr(0);
+                            break;
+                        case 'C':
+                            //write own code
+                            write_addr((unsigned int) kernel_text_section);
+                            break;
+                        case 'U':
+                            //read unassigned addr
+                            read_addr((unsigned int) user_bss_section + ONE_MB);
+                            break;
+                        case 'X':
+                            //jump user code
+                            jump_addr((unsigned int) user_text_section);
+                            break;
+                        default:
+                            break;
                     }
+
                     put_ring_buffer(input);
                     uart_wake();
                     break;

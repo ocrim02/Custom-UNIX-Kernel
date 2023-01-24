@@ -1,10 +1,5 @@
 #include <kernel/thread.h>
 
-#define PCR_USR_IFT 16
-#define IDLE_THREAD_COUNT 1
-#define THREAD_COUNT 32
-#define NULL 0
-
 //aus VL7
 struct tcb{
     unsigned int r[13];
@@ -225,7 +220,7 @@ struct tcb* next_in_queue(){
 
 void reset_thread(struct tcb* thread){
     thread->state = Finished;
-    thread->sp = (THREAD_SP_BASE + THREAD_SP_SIZE * thread->id);
+    thread->sp = (THREAD_SP_BASE - THREAD_SP_SIZE * thread->id);
 }
 
 
