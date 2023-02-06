@@ -13,6 +13,7 @@ struct tcb{
     struct tcb *rq_prev;
     enum WAITING_FOR waiting_reason;
     unsigned int timer_intervals;
+    int pid;
 };
 
 struct tcb tcbs[THREAD_COUNT + IDLE_THREAD_COUNT];
@@ -20,6 +21,8 @@ struct tcb tcbs[THREAD_COUNT + IDLE_THREAD_COUNT];
 struct tcb *runqueue;
 
 struct tcb *running_thread = NULL;
+
+bool used_pids[PROCESS_COUNT] = {false, false, false, false, false, false, false, false};
 
 
 /*
@@ -71,6 +74,7 @@ void change_thread(struct dump_regs* regs, enum THREAD_STATE reason){
     next_thread->state = Running;
 
     running_thread = next_thread;
+    switch_pid(running_thread->pid);
 
 }
 
@@ -88,7 +92,7 @@ struct tcb* idle_thread(){
 }
 
 
-bool thread_create(void (*func)(void *), const void *args, unsigned int args_size){
+bool thread_create(void (*func)(void *), const void *args, unsigned int args_size, bool new_pid){
     struct tcb *free_thread = get_free_thread();
     if(free_thread == NULL){
         //No free thread available
@@ -109,6 +113,23 @@ bool thread_create(void (*func)(void *), const void *args, unsigned int args_siz
     free_thread->r[1] = args_size;
     free_thread->state = Ready;
 
+
+    if(new_pid){
+        for(int i=0; i<PROCESS_COUNT-1; i++){
+            if(i == PROCESS_COUNT-1 && used_pids[i] == true){
+                kprintf("Error: No free process space available!");
+            }
+            if(used_pids[i] == false){
+                free_thread->pid = i;
+                used_pids[i] = true;
+                pid_create(i);
+                break;
+            }
+        }
+    }
+    else{
+        free_thread->pid = running_thread->pid;
+    }
     add_to_queue_start(free_thread);
     return true;
 }
@@ -131,9 +152,11 @@ void init_threads(){
         tcbs[i].sp = (THREAD_SP_BASE - THREAD_SP_SIZE * i);
         tcbs[i].timer_intervals = 0;
         tcbs[i].waiting_reason = 0;
+        tcbs[i].pid = -1;
     }
     runqueue = &tcbs[0];
 
+    tcbs[THREAD_COUNT].pid = -1;
     tcbs[THREAD_COUNT].rq_next = NULL;
     tcbs[THREAD_COUNT].rq_prev = NULL;
     tcbs[THREAD_COUNT].state = Ready;
@@ -220,6 +243,8 @@ struct tcb* next_in_queue(){
 
 void reset_thread(struct tcb* thread){
     thread->state = Finished;
+    used_pids[thread->pid] = false;
+    thread->pid = -1;
     thread->sp = (THREAD_SP_BASE - THREAD_SP_SIZE * thread->id);
 }
 

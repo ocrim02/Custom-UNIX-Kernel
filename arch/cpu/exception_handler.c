@@ -45,8 +45,8 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
             break;
         case EX_SVC:
             if(read_masked(regs->spsr, 4, 0) == USR_MODE){
-                void (*func[5]) (struct dump_regs*)= {&getc_routine, &putc_routine, &exit_routine, &sleep_routine, &thread_create_routine};
-                if(regs->r[0] > 4){
+                void (*func[6]) (struct dump_regs*)= {&getc_routine, &putc_routine, &exit_routine, &sleep_routine, &thread_create_routine, &process_create_routine};
+                if(regs->r[0] > 5){
                     reg_dump(mode, regs);
                     kprintf("Invalid syscall. Exit thread...\n");
                     change_thread(regs, Finished);
@@ -110,10 +110,6 @@ void exception(enum EXCEPTION_MODE mode, struct dump_regs * regs){
                         case 'C':
                             //write own code
                             write_addr((unsigned int) kernel_text_section);
-                            break;
-                        case 'U':
-                            //read unassigned addr
-                            read_addr((unsigned int) user_bss_section + ONE_MB);
                             break;
                         case 'X':
                             //jump user code

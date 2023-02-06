@@ -60,13 +60,10 @@ SECTIONS
 	user_data_section = .;
 	.udata : {
 		build/user/*.o(.data)
+		build/user/*.o(.bss)
 	}
 	user_data_size = SIZEOF(.udata);
 
 	. = ALIGN(0x00100000);
-	user_bss_section = .;
-	.ubss : {
-		build/user/*.o(.bss)
-	}
-	user_bss_size = SIZEOF(.ubss);
+	pid_section = .;
 }

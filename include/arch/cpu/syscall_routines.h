@@ -10,5 +10,6 @@ void putc_routine(struct dump_regs * regs);
 void exit_routine(struct dump_regs * regs);
 void sleep_routine(struct dump_regs * regs);
 void thread_create_routine(struct dump_regs * regs);
+void process_create_routine(struct dump_regs * regs);
 
 #endif

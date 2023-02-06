@@ -24,6 +24,10 @@ bool syscall_thread_create(void (*func)(void *), const void* args, unsigned int 
     return (bool) create_supervisor_call(THREAD_CREATE, (unsigned int) func, (unsigned int) args, arg_size);
 }
 
+bool syscall_process_create(void (*func)(void *), const void* args, unsigned int arg_size){
+    return (bool) create_supervisor_call(PROCESS_CREATE, (unsigned int) func, (unsigned int) args, arg_size);
+}
+
 void undef_syscall(){
     create_supervisor_call(5, 0, 0, 0);
 }

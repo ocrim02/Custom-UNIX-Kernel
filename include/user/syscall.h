@@ -10,6 +10,7 @@ void syscall_putc(char);
 void syscall_sleep(unsigned int);
 void syscall_exit()__attribute__((weak)); 
 bool syscall_thread_create(void (*func)(void *), const void*, unsigned int);
+bool syscall_process_create(void (*func)(void *), const void*, unsigned int);
 void undef_syscall();
 
 

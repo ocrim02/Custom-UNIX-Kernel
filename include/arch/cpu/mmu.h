@@ -14,7 +14,7 @@ extern unsigned int kernel_bss_section[]__attribute__((weak));
 extern unsigned int user_text_section[]__attribute__((weak));
 extern unsigned int user_rodata_section[]__attribute__((weak));
 extern unsigned int user_data_section[]__attribute__((weak));
-extern unsigned int user_bss_section[]__attribute__((weak));
+extern unsigned int pid_section[]__attribute__((weak));
 
 extern unsigned int kernel_text_size[]__attribute__((weak));
 extern unsigned int kernel_rodata_size[]__attribute__((weak));
@@ -23,7 +23,6 @@ extern unsigned int kernel_bss_size[]__attribute__((weak));
 extern unsigned int user_text_size[]__attribute__((weak));
 extern unsigned int user_rodata_size[]__attribute__((weak));
 extern unsigned int user_data_size[]__attribute__((weak));
-extern unsigned int user_bss_size[]__attribute__((weak));
 #endif
 
 #define ONE_MB (1024*1024)
@@ -51,5 +50,7 @@ void mmu_l2_fault(void * virt_addr, uint32_t l2_table[256]);
 void mmu_l1_fault(void * virt_addr);
 void show_l1_table(unsigned int from, unsigned int to);
 void show_l2_table(uint32_t l2_table[256]);
+void switch_pid(int pid);
+void pid_create(unsigned int pid);
 
 #endif

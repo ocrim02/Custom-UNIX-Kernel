@@ -7,5 +7,7 @@
 
 void main() __attribute__((weak));
 void worker_thread(void*);
+void worker_process(void* arg);
+int uint_to_dec_str (char* string, unsigned int value);
 
 #endif

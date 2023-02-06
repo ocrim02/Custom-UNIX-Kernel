@@ -1,7 +1,7 @@
 #include <arch/cpu/mmu.h>
 
 static uint32_t l1_table[4096]__attribute__((aligned(0x4000)));
-static uint32_t l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT)][256]__attribute__((aligned(1024)));
+static uint32_t l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT + PROCESS_COUNT)][256]__attribute__((aligned(1024)));
 
 
 void mmu_l1_section(void * virt_addr, void * phy_addr, enum mmu_permission perm, bool pxn, bool xn){
@@ -79,17 +79,18 @@ void* l1_table_init(){
     mmu_l1_section((void*) MAX_RAM_ADDR - ONE_MB, (void*) MAX_RAM_ADDR - ONE_MB, RW_NA, true, true);
 
 
-    unsigned int* sizes[8] =    {kernel_text_size,    kernel_rodata_size,    kernel_data_size,    kernel_bss_size,    user_text_size,    user_rodata_size,    user_data_size,    user_bss_size};
-    unsigned int* sections[8] = {kernel_text_section, kernel_rodata_section, kernel_data_section, kernel_bss_section, user_text_section, user_rodata_section, user_data_section, user_bss_section};
-    unsigned int rights[8] =    {R_NA,                R_NA,                  RW_NA,               RW_NA,              R_R,               R_R,                 FULL_ACCESS,       FULL_ACCESS};
-    bool pxn[8] =               {false,               true,                  true,                true,               true,              true,                true,              true};
-    bool xn[8] =                {false,               true,                  true,                true,               false,             true,                true,              true};
+    unsigned int* sizes[7] =    {kernel_text_size,    kernel_rodata_size,    kernel_data_size,    kernel_bss_size,    user_text_size,    user_rodata_size,    user_data_size};
+    unsigned int* sections[7] = {kernel_text_section, kernel_rodata_section, kernel_data_section, kernel_bss_section, user_text_section, user_rodata_section, user_data_section};
+    unsigned int rights[7] =    {R_NA,                R_NA,                  RW_NA,               RW_NA,              R_R,               R_R,                 RW_NA};
+    bool pxn[7] =               {false,               true,                  true,                true,               true,              true,                true};
+    bool xn[7] =                {false,               true,                  true,                true,               false,             true,                true};
 
     for(unsigned int sect=0; sect<sizeof(sizes)/sizeof(unsigned int); sect++){
         for(int i=0; i<=(int) sizes[sect]/ONE_MB; i++){
             mmu_l1_section((void*) sections[sect] + i * ONE_MB, (void*) sections[sect] + i * ONE_MB, rights[sect], pxn[sect], xn[sect]);
         }
     }
+
     tcb_l2_init();
 
     return l1_table;
@@ -104,6 +105,55 @@ void tcb_l2_init(){
         }
         mmu_l2_fault((void*) (THREAD_SP_BASE - (tcb * THREAD_SP_SIZE) - (255 * L2_SIZE) - 1), l2_table_arr[tcb]);
     }
+
+    
+}
+
+void pid_create(unsigned int pid){
+    kprintf("pid create\n");
+    if(pid >= THREAD_COUNT){
+        kprintf("Error: invalid pid!");
+        return;
+    }
+
+    //Pid space
+    for(int id=0; id<PROCESS_COUNT; id++){
+        mmu_l1_l2((void*) ((unsigned int) user_data_section + (unsigned int)(id * ONE_MB)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + id], true);
+        for(int i=0; i<256; i++){
+            mmu_l2_small((void*) ((unsigned int) user_data_section + (unsigned int) (id * ONE_MB) + (unsigned int) (i * L2_SIZE)), (void*) ((unsigned int) user_data_section + (unsigned int) (id * ONE_MB) + (unsigned int) (i * L2_SIZE)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + id], RW_NA, true);
+        }
+    }
+    clear_tlb();
+
+    unsigned int* src = user_data_section;
+    unsigned int* dest = pid_section + ONE_MB * pid;
+    for(unsigned int i=0; i<ONE_MB/4; i++){
+        unsigned int mem = *(unsigned int*)(src + 4*i);
+        *(dest + 4*i) = mem;
+    }
+}
+
+// -1 to block all processes
+void switch_pid(int pid){
+    kprintf("switch to pid %i\n", pid);
+    for(int id=0; id<PROCESS_COUNT; id++){
+        mmu_l1_l2((void*) ((unsigned int) user_data_section + (unsigned int) (id * ONE_MB)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + id], true);
+        for(int i=0; i<256; i++){
+            mmu_l2_small((void*) ((unsigned int) user_data_section + (unsigned int) (id * ONE_MB) + (unsigned int) (i * L2_SIZE)), (void*) ((unsigned int) user_data_section + (unsigned int) (id * ONE_MB) + (unsigned int) (i * L2_SIZE)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + id], RW_NA, true);
+        }
+    }
+
+    if(pid >= 0 && pid<PROCESS_COUNT){
+        mmu_l1_l2((void*) ((unsigned int) pid_section + (unsigned int) (pid * ONE_MB)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT)], true);
+        mmu_l1_l2((void*) ((unsigned int) user_data_section), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + pid + 1], true);
+        for(int i=0; i<256; i++){
+            mmu_l2_small((void*) ((unsigned int) user_data_section + (unsigned int) (i * L2_SIZE)), (void*) ((unsigned int) pid_section + (unsigned int) (pid * ONE_MB) + (unsigned int) (i * L2_SIZE)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + pid + 1], FULL_ACCESS, true);
+        }
+    }
+
+    //stack rights
+
+    clear_tlb();
 }
 
 

@@ -10,6 +10,7 @@
 #define IDLE_THREAD_COUNT 1
 #define THREAD_COUNT 32
 #define NULL 0
+#define PROCESS_COUNT 9
 
 enum THREAD_STATE{
     Ready = 0,
@@ -27,7 +28,7 @@ typedef struct dump_regs dump_regs;
 
 
 void change_thread(struct dump_regs*, enum THREAD_STATE);
-bool thread_create(void (*func)(void *), const void*, unsigned int);
+bool thread_create(void (*func)(void *), const void*, unsigned int, bool new_pid);
 struct tcb* get_free_thread();
 void init_threads();
 void add_to_queue_start(struct tcb*);

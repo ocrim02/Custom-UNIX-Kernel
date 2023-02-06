@@ -37,7 +37,9 @@ void start_kernel(){
 	mmu_init(l1_table);
 	clear_tlb();
 
-	thread_create(&main, 0, 0);
+
+	kprintf("init done\n");
+	thread_create(&main, 0, 0, true);
 
 	// Endless counter
 	for (;;) {

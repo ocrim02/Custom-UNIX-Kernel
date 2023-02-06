@@ -7,6 +7,7 @@ enum call_type{
     EXIT = 2,
     SLEEP = 3,
     THREAD_CREATE = 4,
+    PROCESS_CREATE = 5,
 };
 
 void create_prefetch_abort();

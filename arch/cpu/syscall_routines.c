@@ -28,6 +28,11 @@ void sleep_routine(struct dump_regs * regs){
 }
 
 void thread_create_routine(struct dump_regs * regs){
-    regs->r[0] = thread_create((void*) regs->r[1], (void*) regs->r[2], regs->r[3]); 
+    regs->r[0] = thread_create((void*) regs->r[1], (void*) regs->r[2], regs->r[3], false); 
+    regs->pc = regs->pc + 4;
+}
+
+void process_create_routine(struct dump_regs * regs){
+    regs->r[0] = thread_create((void*) regs->r[1], (void*) regs->r[2], regs->r[3], true); 
     regs->pc = regs->pc + 4;
 }
