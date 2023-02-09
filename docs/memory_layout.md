@@ -7,7 +7,10 @@ The first 1 MB is reserved for UBoot and the Init section.
 All sections of the kernel (.text, .rodata, .data, .bss) get 1 MB each starting behind the first MB.
 
 ## User
-All sections of the user (.utext, .urodata, .udata, .ubss) get 1 MB each starting (1 MB alingned) behind the kernel bss section.
+All sections of the user (.utext, .urodata, .udata + .ubss) get 1 MB each starting (1 MB alingned) behind the kernel bss section.
+
+## Process Space
+Behind the user section is a reserved space for PROCCESS_COUNT - 1 times 1 MB for process data.
 
 ## Kernel Stacks
 The kernel stack is positioned at the end of the 128 MB of available RAM. <br>

@@ -22,7 +22,7 @@ struct tcb *runqueue;
 
 struct tcb *running_thread = NULL;
 
-bool used_pids[PROCESS_COUNT] = {false, false, false, false, false, false, false, false};
+bool used_pids[PROCESS_COUNT-1] = {false, false, false, false, false, false, false, false};
 
 
 /*
@@ -74,7 +74,7 @@ void change_thread(struct dump_regs* regs, enum THREAD_STATE reason){
     next_thread->state = Running;
 
     running_thread = next_thread;
-    switch_pid(running_thread->pid);
+    switch_pid(running_thread->pid, running_thread->id);
 
 }
 
@@ -243,9 +243,16 @@ struct tcb* next_in_queue(){
 
 void reset_thread(struct tcb* thread){
     thread->state = Finished;
-    used_pids[thread->pid] = false;
+    int pid = thread->pid;
     thread->pid = -1;
     thread->sp = (THREAD_SP_BASE - THREAD_SP_SIZE * thread->id);
+
+    for(int i=0; i<THREAD_COUNT; i++){
+        if(tcbs[i].pid == pid){
+            return;
+        }
+    }
+    used_pids[pid] = false;
 }
 
 

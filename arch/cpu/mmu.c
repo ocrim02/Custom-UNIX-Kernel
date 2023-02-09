@@ -38,7 +38,7 @@ void mmu_l2_fault(void * virt_addr, uint32_t l2_table[256]){
 void mmu_l2_small(void * virt_addr, void * phy_addr, uint32_t l2_table[256], enum mmu_permission perm, bool xn){
     unsigned int index = read_masked((unsigned int) virt_addr, 19, 12);
     uint32_t section_entry = 2;
-    section_entry = write_masked(section_entry, (uint32_t) phy_addr>>12, 19, 12);
+    section_entry = write_masked(section_entry, (uint32_t) phy_addr>>12, 31, 12); //19 -> 31
     section_entry = write_masked(section_entry, perm>>2, 9, 9);
     section_entry = write_masked(section_entry, perm, 5, 4);
     if(xn){
@@ -105,18 +105,15 @@ void tcb_l2_init(){
         }
         mmu_l2_fault((void*) (THREAD_SP_BASE - (tcb * THREAD_SP_SIZE) - (255 * L2_SIZE) - 1), l2_table_arr[tcb]);
     }
-
     
 }
 
 void pid_create(unsigned int pid){
-    kprintf("pid create\n");
-    if(pid >= THREAD_COUNT){
+    if(pid >= PROCESS_COUNT - 1){
         kprintf("Error: invalid pid!");
         return;
     }
 
-    //Pid space
     for(int id=0; id<PROCESS_COUNT; id++){
         mmu_l1_l2((void*) ((unsigned int) user_data_section + (unsigned int)(id * ONE_MB)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + id], true);
         for(int i=0; i<256; i++){
@@ -126,23 +123,24 @@ void pid_create(unsigned int pid){
     clear_tlb();
 
     unsigned int* src = user_data_section;
-    unsigned int* dest = pid_section + ONE_MB * pid;
+    unsigned int* dest = (unsigned int*) ((unsigned int) pid_section + (unsigned int) (ONE_MB * pid));
     for(unsigned int i=0; i<ONE_MB/4; i++){
         unsigned int mem = *(unsigned int*)(src + 4*i);
         *(dest + 4*i) = mem;
     }
+
 }
 
 // -1 to block all processes
-void switch_pid(int pid){
-    kprintf("switch to pid %i\n", pid);
+void switch_pid(int pid, int thread_id){
+    //lock all data section
     for(int id=0; id<PROCESS_COUNT; id++){
         mmu_l1_l2((void*) ((unsigned int) user_data_section + (unsigned int) (id * ONE_MB)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + id], true);
         for(int i=0; i<256; i++){
             mmu_l2_small((void*) ((unsigned int) user_data_section + (unsigned int) (id * ONE_MB) + (unsigned int) (i * L2_SIZE)), (void*) ((unsigned int) user_data_section + (unsigned int) (id * ONE_MB) + (unsigned int) (i * L2_SIZE)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + id], RW_NA, true);
         }
     }
-
+    //free data section for selected process
     if(pid >= 0 && pid<PROCESS_COUNT){
         mmu_l1_l2((void*) ((unsigned int) pid_section + (unsigned int) (pid * ONE_MB)), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT)], true);
         mmu_l1_l2((void*) ((unsigned int) user_data_section), l2_table_arr[(THREAD_COUNT + IDLE_THREAD_COUNT) + pid + 1], true);
@@ -151,7 +149,19 @@ void switch_pid(int pid){
         }
     }
 
-    //stack rights
+    //lock als thred sp
+    for(int tcb=0; tcb<(THREAD_COUNT + IDLE_THREAD_COUNT); tcb++){
+        mmu_l1_l2((void*) (THREAD_SP_BASE - (tcb * THREAD_SP_SIZE) - 1), l2_table_arr[tcb], true);
+        for(int i=0; i<256; i++){
+            mmu_l2_small((void*) (THREAD_SP_BASE - (tcb * THREAD_SP_SIZE) - (i * L2_SIZE) - 1), (void*)  (THREAD_SP_BASE - (tcb * THREAD_SP_SIZE) - (i * L2_SIZE) - 1), l2_table_arr[tcb], RW_NA, true);
+        }
+        mmu_l2_fault((void*) (THREAD_SP_BASE - (tcb * THREAD_SP_SIZE) - (255 * L2_SIZE) - 1), l2_table_arr[tcb]);
+    }
+    //unlock sp for running thread
+    for(int i=0; i<256; i++){
+        mmu_l2_small((void*) (THREAD_SP_BASE - (thread_id * THREAD_SP_SIZE) - (i * L2_SIZE) - 1), (void*)  (THREAD_SP_BASE - (thread_id * THREAD_SP_SIZE) - (i * L2_SIZE) - 1), l2_table_arr[thread_id], FULL_ACCESS, true);
+    }
+    mmu_l2_fault((void*) (THREAD_SP_BASE - (thread_id * THREAD_SP_SIZE) - (255 * L2_SIZE) - 1), l2_table_arr[thread_id]);
 
     clear_tlb();
 }

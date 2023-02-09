@@ -50,7 +50,7 @@ void mmu_l2_fault(void * virt_addr, uint32_t l2_table[256]);
 void mmu_l1_fault(void * virt_addr);
 void show_l1_table(unsigned int from, unsigned int to);
 void show_l2_table(uint32_t l2_table[256]);
-void switch_pid(int pid);
+void switch_pid(int pid, int thread_id);
 void pid_create(unsigned int pid);
 
 #endif

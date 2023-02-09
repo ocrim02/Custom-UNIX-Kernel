@@ -9,11 +9,6 @@ void worker_thread(void* arg){
 	char id = *((char*) arg);
 	unsigned int priv_counter = 0;
 	char string[8];
-	int len = uint_to_dec_str(string, global_counter);
-	for(int i=0; i<len; i++){
-		syscall_putc(string[i]);
-	}
-
 	while(global_counter < 130){
 		priv_counter++;
 		global_counter++;
@@ -42,7 +37,6 @@ void worker_thread(void* arg){
 
 void worker_process(void* arg){
 	letter = *((char*) arg);
-	syscall_putc(letter);
 	char id = '1';
 	syscall_thread_create(worker_thread, &id, sizeof(id));
 	id = '2';
@@ -56,7 +50,6 @@ void worker_process(void* arg){
 void main(){
 	for(;;){
 		char c = syscall_getc();
-		syscall_putc(c);
 		syscall_process_create(worker_process, &c, sizeof(c));
 	}
 }
